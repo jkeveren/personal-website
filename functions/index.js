@@ -10,6 +10,7 @@ const writeContent = createContentWriter({targetHostname, targetURL});
 exports.index = functions.https.onRequest(async (request, response) => {
 	try {
 		response.setHeader('content-type', 'text/html');
+		response.setHeader('cache-control', 'no-store');
 		await writeContent({response, targetURL});
 		return response.end();
 	} catch (error) {

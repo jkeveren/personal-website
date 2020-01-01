@@ -8,10 +8,9 @@ module.exports = ({targetHostname, targetURL}) => {
 
 	const createPrecontent = fillerLength =>
 	`<!DOCTYPE html>
-	<html style="font-family:roboto mono;font-size:0.9em">
+	<html style="font-family:monospace">
 	<title>${title}</title>
 	<meta name=viewport content=width=device-width,user-scalable=no />
-	<link href="https://fonts.googleapis.com/css?family=Roboto+Mono&display=swap" rel="stylesheet">
 	<meta name="title" content="${title}">
 	<meta name="description" content="${description}">
 	<meta property="og:type" content="website">
@@ -22,8 +21,6 @@ module.exports = ({targetHostname, targetURL}) => {
 	<meta property="twitter:title" content="${title}">
 	<meta property="twitter:description" content="${description}">
 	<link rel="icon" type="image/png" href="data:image/png">
-	<!-- Global site tag (gtag.js) - Google Analytics -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-107575308-1"></script>
 	<script>
 	  (window.dataLayer = window.dataLayer || []).push('js', new Date(), 'config', 'UA-107575308-1');
 	</script>
@@ -39,13 +36,15 @@ module.exports = ({targetHostname, targetURL}) => {
 		You can get away with using one less padding byte becasue the first byte of content causes the browser to "render" the invisible padding bytes and the content byte itself.
 		Not that a one byte difference is important. Just interesting to me because im weird.
 
+		If the page loaded instantly anyway it's because this is currently deployed to firebase functions which doesn't handle streaming data well so its been disabled by setting delayMultiplier to 0.
+
 		Anyway heres a few unnecessarily cryptographically random and HTML-invalid bytes (generated at server start for efficiency of course):
 	${fillerLength ? crypto.randomBytes(fillerLength) : ''}
 	-->\n`;
 	const preContentTargetLength = 4095;
 	const precontent = createPrecontent(preContentTargetLength - createPrecontent().length);
 
-	const delayMultiplier = 50;
+	const delayMultiplier = 0; // Once deployed to GCE change this to 1 and change the text above too.
 
 	const writeText = async (response, text) => {
 		for (const character of text) {
@@ -63,7 +62,7 @@ module.exports = ({targetHostname, targetURL}) => {
 			}
 			for (const character of line) {
 				response.write(character);
-				await delay(30);
+				await delay(30 * delayMultiplier);
 			}
 		}
 	};
@@ -74,8 +73,8 @@ module.exports = ({targetHostname, targetURL}) => {
 		response.write('</a>');
 	};
 
-	const pause = () => delay(500);
-	const shortPause = () => delay(250);
+	const pause = () => delay(500 * delayMultiplier);
+	const shortPause = () => delay(250 * delayMultiplier);
 
 	return async ({response}) => {
 		const writeSlowText = createSlowTextWriter(response);
@@ -113,7 +112,7 @@ module.exports = ({targetHostname, targetURL}) => {
 			['GitHub',      'https://github.com/jkeveren'],
 // 			['Twitter',     'https://twitter.com/JamesKeveren'],
 			['Instagram',   'https://instagram.com/jameskeveren'],
-			['Thingiverse', 'https://thingiverse.com/jkeveren'],
+			['Thingiverse', 'https://www.thingiverse.com/jkeveren/designs'],
 		]) {
 			await writeSlowText('- ');
 			response.write(`<a target=_blank href=${url}>`);
