@@ -7,8 +7,7 @@ module.exports = ({targetHostname, targetURL}) => {
 	const email = 'james@keve.ren';
 
 	const createPrecontent = fillerLength =>
-	`<!DOCTYPE html>
-	<html style="font-family:monospace">
+	`<html style="font-family:monospace">
 	<title>${title}</title>
 	<meta name=viewport content=width=device-width,user-scalable=no />
 	<meta name="title" content="${title}">
@@ -21,31 +20,40 @@ module.exports = ({targetHostname, targetURL}) => {
 	<meta property="twitter:title" content="${title}">
 	<meta property="twitter:description" content="${description}">
 	<link rel="icon" type="image/png" href="data:image/png">
+	<script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-analytics.js"></script>
 	<script>
-	  (window.dataLayer = window.dataLayer || []).push('js', new Date(), 'config', 'UA-107575308-1');
+		firebase.initializeApp({
+			apiKey: "AIzaSyD1kvnPN1m8ree6R-HSKzOlLffhMsEhmHI",
+			authDomain: "website-ba4ce.firebaseapp.com",
+			databaseURL: "https://website-ba4ce.firebaseio.com",
+			projectId: "website-ba4ce",
+			storageBucket: "website-ba4ce.appspot.com",
+			messagingSenderId: "56181516216",
+			appId: "1:56181516216:web:8d173d560ddb0a0ac3d14d",
+			measurementId: "G-ZB4SMXQCZ0"
+		});
+		firebase.analytics();
 	</script>
 	<!--
 		This is just a filler comment to consume a few bytes so browsers start rendering content as it arrives.
 
-		Here's how many bytes it takes some browsers to start rendering content immediately (when sent with "content-type" header of "text/html"):
-		- Google Chrome 78.0.3904.70:       3
-		- Mozilla Firefox 69.0.3:           1024
-		- Microsoft Edge 44.18362.387.0:    512
-		- Internet Explorer 11.418.18362.0: 4096
+		Here's how many bytes it takes some browsers to start rendering content on next byte sent (when sent with "content-type" header of "text/html"):
+		- Google Chrome 78.0.3904.70:       2
+		- Mozilla Firefox 69.0.3:           1023
+		- Microsoft Edge 44.18362.387.0:    511
+		- Internet Explorer 11.418.18362.0: 4095
 
-		You can get away with using one less padding byte becasue the first byte of content causes the browser to "render" the invisible padding bytes and the content byte itself.
-		Not that a one byte difference is important. Just interesting to me because im weird.
+		If the page loaded instantly anyway it's because this is currently deployed to firebase functions which doesn't handle streaming data well so its been disabled.
 
-		If the page loaded instantly anyway it's because this is currently deployed to firebase functions which doesn't handle streaming data well so its been disabled by setting delayMultiplier to 0.
-
-		Anyway heres a few unnecessarily cryptographically random and HTML-invalid bytes (generated at server start for efficiency of course):
+		Anyway heres a few unnecessarily cryptographically random and HTML-invalid bytes:
 	${fillerLength ? crypto.randomBytes(fillerLength) : ''}
-	-->\n`;
+	-->
+	`;
 	const preContentTargetLength = 4095;
 	const precontent = createPrecontent(preContentTargetLength - createPrecontent().length);
 
-	const delayMultiplier = 0; // Once deployed to GCE change this to 1 and change the text above too.
-
+	const delayMultiplier = 1;
 	const writeText = async (response, text) => {
 		for (const character of text) {
 			response.write(character);
@@ -68,7 +76,7 @@ module.exports = ({targetHostname, targetURL}) => {
 	};
 
 	const createLinkWriter = (response, writeSlowText) => async (url, text) => {
-		response.write(`<a href=${url}>`);
+		response.write(`<a href=${url} target=_blank >`);
 		await writeSlowText(text);
 		response.write('</a>');
 	};
@@ -108,7 +116,7 @@ module.exports = ({targetHostname, targetURL}) => {
 		);
 		await shortPause();
 		for (const [text, url] of [
-// 			['YouTube',     'https://www.youtube.com/channel/UCsUkIjz__XMM4fYbKGMGmpQ'],
+// 			['YouTube',     'https://www.youtube.com/channel/UCsUkIjz__XMM4fYbKGMGmpQ'], // this link is incorrect
 			['GitHub',      'https://github.com/jkeveren'],
 // 			['Twitter',     'https://twitter.com/JamesKeveren'],
 			['Instagram',   'https://instagram.com/jameskeveren'],
@@ -119,12 +127,5 @@ module.exports = ({targetHostname, targetURL}) => {
 			await writeSlowText(text);
 			response.write('</a><br>');
 		}
-	
-		// Fin.
-		await pause();
-		await writeSlowText(
-			`
-			Fin.`
-		);
 	};
 }

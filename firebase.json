@@ -1,18 +1,23 @@
 {
-  "hosting": {
-    "public": "public",
-    "redirects": [
-      {
-        "source": "!/",
-        "destination": "/",
-        "type": 307
-      }
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "function": "index"
-      }
-    ]
-  }
+	"hosting": {
+		"public": "public",
+		"redirects": [
+			{
+				"source": "!/",
+				"destination": "/",
+				"type": 307
+			}
+		],
+		"rewrites": [
+			{
+				"source": "**",
+				"destination": "index.html"
+			}
+		]
+	},
+	"emulators": {
+		"hosting": {
+			"port": 50000
+		}
+	}
 }
