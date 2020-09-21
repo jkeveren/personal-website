@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -15,7 +15,6 @@ var url = "https://james.keve.ren"
 var lines [][]byte
 
 var content = `James Keveren
-<a target=_blank href=` + url + `>james.keve.ren</a>
 <a target=_blank href=mailto:james@keve.ren>james@keve.ren</a>
 
 I write software and make things.
@@ -44,55 +43,29 @@ func main() {
 	if port == "" {
 		port = "50000"
 	}
-	log.Print("Starting HTTP Server on Port " + port + ". Configure using PORT environment variable.")
-	log.Panic(http.ListenAndServe(":"+port, handler{}))
-}
-
-func makeBase(padding string) string {
-	title := "James Keveren"
-	description := "Software Developer"
-
-	return `<html style="font-family:monospace; background: black; color: white">
-	<title>` + title + `</title>
-	<meta name=viewport content=width=device-width,user-scalable=no />
-	<meta name="title" content="` + title + `">
-	<meta name="description" content="` + description + `">
-	<meta property="og:type" content="website">
-	<meta property="og:url" content="` + url + `">
-	<meta property="og:title" content="` + title + `">
-	<meta property="og:description" content="` + description + `">
-	<meta property="twitter:url" content="` + url + `">
-	<meta property="twitter:title" content="` + title + `">
-	<meta property="twitter:description" content="` + description + `">
-	<link rel="icon" type="image/png" href="data:image/png">
-	<style>a {color: #ff0}</style>
-	<!-- This is just a filler comment to consume a few bytes so browsers start rendering content as it arrives.
-
-	Here's how many bytes it takes for each browser to start rendering HTML as each byte arrives:
-	- Google Chrome 78.0.3904.70:	   2
-	- Microsoft Edge 44.18362.387.0:	511 (probably different since Blink)
-	- Mozilla Firefox 69.0.3:		   1023
-	- Internet Explorer 11.418.18362.0: 4095
-
-	Anyway here's some padding garbage for IE compatability: ` + padding + "h -->\n"
+	fmt.Println("Starting HTTP Server on Port " + port + ". Configure using PORT environment variable.")
+	panic(http.ListenAndServe(":"+port, handler{}))
 }
 
 type handler struct{}
 
 func (handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Print("----------------------Request----------------------")
-	log.Printf("IP: %v", r.RemoteAddr)
-	for name, values := range r.Header {
-		for _, value := range values {
-			log.Printf("%v: %v", name, value)
-		}
-	}
+	fmt.Printf(
+		`Request:
+- IP: %v
+- Forwarded For: %v
+- Agent: %v
+`,
+		r.RemoteAddr,
+		r.Header.Get("x-forwarded-for"),
+		r.Header.Get("user-agent"),
+	)
 
 	flusher, ok := w.(http.Flusher)
 	if !ok {
 		w.WriteHeader(500)
 		w.Write([]byte("server error"))
-		log.Panic("Could not get flusher")
+		panic("Could not get flusher")
 		return
 	}
 
@@ -108,4 +81,66 @@ func (handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Write(line)
 		flusher.Flush()
 	}
+}
+
+func makeBase(padding string) string {
+	title := "James Keveren"
+	description := "Software Developer"
+
+	// Yea this is ugly but I want to keep this simple.
+	return `<html style="font-family:monospace; background: black; color: white">
+	<title>` + title + `</title>
+	<meta name=viewport content=width=device-width,user-scalable=no />
+	<meta name="title" content="` + title + `">
+	<meta name="description" content="` + description + `">
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="` + url + `">
+	<meta property="og:title" content="` + title + `">
+	<meta property="og:description" content="` + description + `">
+	<meta property="twitter:url" content="` + url + `">
+	<meta property="twitter:title" content="` + title + `">
+	<meta property="twitter:description" content="` + description + `">
+	<link rel="icon" type="image/png" href="data:image/png">
+	<style>a {color: #ff0}</style>
+	<script>
+		console.log('https://github.com/jkeveren/website');
+		const title = 'James Keveren';
+		let blinkIntervalId = 0;
+		let blurred = false;
+		const typeTitle = async () => {
+			clearInterval(blinkIntervalId);
+			let partialTitle = '';
+			for (let character of title) {
+				await new Promise(resolve => setTimeout(resolve, 200));
+				if (blurred) {
+					return;
+				}
+				partialTitle += character
+				document.title = partialTitle + '_';
+			}
+			let cursorState = true;
+			blinkIntervalId = setInterval(() => {
+				document.title = (cursorState = !cursorState) ? title : title + '_';
+			}, 500);
+		};
+		typeTitle();
+		addEventListener('focus', () => {
+			blurred = false;
+			typeTitle();
+		});
+		addEventListener('blur', () => {
+			blurred = true;
+			clearInterval(blinkIntervalId);
+			document.title = title;
+		});
+	</script>
+	<!-- This is just a filler comment to consume a few bytes so browsers start rendering content as it arrives.
+
+	Here's how many bytes it takes for each browser to start rendering HTML as each byte arrives:
+	- Google Chrome 78.0.3904.70:       2
+	- Microsoft Edge 44.18362.387.0:    511 (probably different since Blink)
+	- Mozilla Firefox 69.0.3:           1023
+	- Internet Explorer 11.418.18362.0: 4095
+
+	Anyway here's some padding garbage for IE compatability: ` + padding + "h -->\n"
 }
