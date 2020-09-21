@@ -88,7 +88,7 @@ func makeBase(padding string) string {
 	description := "Software Developer"
 
 	// Yea this is ugly but I want to keep this simple.
-	return `<html style="font-family:monospace; background: black; color: white">
+	return `<html style="font-family:monospace; background: #000; color: #fff">
 	<title>` + title + `</title>
 	<meta name=viewport content=width=device-width,user-scalable=no />
 	<meta name="title" content="` + title + `">
@@ -102,11 +102,20 @@ func makeBase(padding string) string {
 	<meta property="twitter:description" content="` + description + `">
 	<link rel="icon" type="image/png" href="data:image/png">
 	<style>a {color: #ff0}</style>
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-107575308-2"></script>
 	<script>
+		(async () => {
+			window.dataLayer = window.dataLayer || [];
+			const gtag = (...a) => dataLayer.push(...a);
+			gtag('js', new Date());
+			gtag('config', 'UA-107575308-2');
+		})();
+
 		console.log('https://github.com/jkeveren/website');
 		const title = 'James Keveren';
 		let blinkIntervalId = 0;
 		let blurred = false;
+
 		const typeTitle = async () => {
 			clearInterval(blinkIntervalId);
 			let partialTitle = '';
@@ -115,7 +124,7 @@ func makeBase(padding string) string {
 				if (blurred) {
 					return;
 				}
-				partialTitle += character
+				partialTitle += character;
 				document.title = partialTitle + '_';
 			}
 			let cursorState = true;
@@ -124,6 +133,7 @@ func makeBase(padding string) string {
 			}, 500);
 		};
 		typeTitle();
+
 		addEventListener('focus', () => {
 			blurred = false;
 			typeTitle();
