@@ -55,10 +55,12 @@ func (handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 - IP: %v
 - Forwarded For: %v
 - Agent: %v
+- Referrer: %v
 `,
 		r.RemoteAddr,
 		r.Header.Get("x-forwarded-for"),
 		r.Header.Get("user-agent"),
+		r.Header.Get("referer"),
 	)
 
 	flusher, ok := w.(http.Flusher)
