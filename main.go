@@ -108,7 +108,7 @@ func makeBase(padding string) string {
 	<script>
 		(async () => {
 			window.dataLayer = window.dataLayer || [];
-			const gtag = (...a) => dataLayer.push(...a);
+			function gtag() {dataLayer.push(arguments);};
 			gtag('js', new Date());
 			gtag('config', 'UA-107575308-2');
 		})();
