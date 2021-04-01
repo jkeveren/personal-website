@@ -1,4 +1,6 @@
 /*
 !.gitignore
 
+!go.mod
+
 !main.go
