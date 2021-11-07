@@ -72,28 +72,7 @@ type handler struct{}
 func (handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	dump, _ := httputil.DumpRequest(r, false)
-	fmt.Printf("%s", dump)
-
-	// forwarded := r.Header.Get("forwarded")
-	// if len(forwarded) == 0 {
-	// forwarded = r.Header.Get("x-forwarded-for")
-	// }
-	//
-	// fmt.Printf(
-	// `Request: %s %s %s
-	// IP: %v
-	// Forwarded: %v
-	// Agent: %v
-	// Referrer: %v
-	// `,
-	// r.Method,
-	// r.URL.Path,
-	// r.Proto,
-	// r.RemoteAddr,
-	// forwarded,
-	// r.Header.Get("user-agent"),
-	// r.Header.Get("referer"),
-	// )
+	fmt.Printf("Request from: %s\n%s", r.RemoteAddr, dump)
 
 	flusher, ok := w.(http.Flusher)
 	if !ok {
