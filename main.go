@@ -41,7 +41,7 @@ Links:
 - <a target=_blank href=https://www.thingiverse.com/jkeveren/designs>Thingiverse</a>
 
 Services:
-- iPerf3: iperf.keve.ren (Maximum 370Mbs s->c / 35Mbs c->s)
+- iPerf3: iperf.keve.ren (Maximum 370Mbs c->s / 35Mbs c<-s)
 `
 
 func main() {
