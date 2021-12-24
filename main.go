@@ -34,14 +34,14 @@ var content = `<pre style="line-height: 1; letter-spacing: -1">
 I write software and make things.
 
 Links:
-- <a target=_blank href=https://instagram.com/jameskeveren>Instagram</a>
-- <a target=_blank href=https://www.youtube.com/channel/UCOK3qJpL0I8qbXZsGzwYKzQ>YouTube</a>
 - <a target=_blank href=https://www.tiktok.com/@jameskeveren>TikTok</a>
+- <a target=_blank href=https://www.youtube.com/channel/UCOK3qJpL0I8qbXZsGzwYKzQ>YouTube</a>
+- <a target=_blank href=https://instagram.com/jameskeveren>Instagram</a>
 - <a target=_blank href=https://github.com/jkeveren>GitHub</a>
 - <a target=_blank href=https://www.thingiverse.com/jkeveren/designs>Thingiverse</a>
 
 Services:
-- iPerf3: iperf.keve.ren (Maximum 370Mbs c->s / 35Mbs c<-s)
+- iPerf3: iperf.keve.ren (Maximum 370Mbps c->s / 35Mbps c<-s)
 `
 
 func main() {
