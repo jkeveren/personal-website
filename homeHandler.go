@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httputil"
-	"os"
 	"time"
 )
 
@@ -21,25 +20,25 @@ func newHomeHandler() homeHandler {
 	minHeadLength := 1023       // 1023 for Firefox, 511 for Edge, 2 for Chrome
 	lineDelayMilliseconds := 20 // delay between sending each line
 
-	t := homeHandler{}
+	h := homeHandler{}
 
-	t.head = t.makeHead(minHeadLength)
-	t.lineDelay = time.Duration(lineDelayMilliseconds)
+	h.head = h.makeHead(minHeadLength)
+	h.lineDelay = time.Duration(lineDelayMilliseconds)
 
-	content, err := os.ReadFile("./content.html")
+	content, err := web.ReadFile("web/index.html")
 	if err != nil {
 		panic(err)
 	}
 	stringLines := bytes.SplitAfter(content, []byte("\n"))
 	for _, stringLine := range stringLines {
-		t.lines = append(t.lines, []byte(stringLine))
+		h.lines = append(h.lines, []byte(stringLine))
 	}
 
-	return t
+	return h
 }
 
 // Trickles content to client
-func (t homeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h homeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// print raw request for live analytics. This website does not need to be scalable.
 	dump, _ := httputil.DumpRequest(r, false)
 	fmt.Printf("Request from: %s\n%s", r.RemoteAddr, dump)
@@ -56,11 +55,11 @@ func (t homeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	headers.Add("content-type", "text/html")
 	// Caching does not allow trickle
 	headers.Add("cache-control", "no-store")
-	w.Write(t.head)
+	w.Write(h.head)
 
-	for i, line := range t.lines {
+	for i, line := range h.lines {
 		if i != 0 {
-			time.Sleep(t.lineDelay * time.Millisecond)
+			time.Sleep(h.lineDelay * time.Millisecond)
 		}
 		w.Write(line)
 		// Allows line by line trickle. Otherwise http will buffer more content before sending.
@@ -68,14 +67,14 @@ func (t homeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (t homeHandler) makeHead(minLength int) []byte {
-	emptyBaseLength := len(t.makeParametricHead(0))
+func (h homeHandler) makeHead(minLength int) []byte {
+	emptyBaseLength := len(h.makeParametricHead(0))
 	paddingLength := minLength - emptyBaseLength
-	return []byte(t.makeParametricHead(paddingLength))
+	return []byte(h.makeParametricHead(paddingLength))
 }
 
 // Returns HTML head with optional padding
-func (t homeHandler) makeParametricHead(paddingLength int) string {
+func (h homeHandler) makeParametricHead(paddingLength int) string {
 	title := "James Keveren"
 	description := "Software Engineer"
 

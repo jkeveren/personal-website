@@ -6,10 +6,10 @@ import (
 )
 
 func TestHomeHandler(t *testing.T) {
-	tr := homeHandler{}
+	h := homeHandler{}
 
 	t.Run("makeParametrichead", func(t *testing.T) {
-		shortLength := len(tr.makeParametricHead(0))
+		shortLength := len(h.makeParametricHead(0))
 		tests := []int{
 			0,
 			50,
@@ -17,7 +17,7 @@ func TestHomeHandler(t *testing.T) {
 		}
 		for _, paddingLength := range tests {
 			t.Run(strconv.Itoa(paddingLength), func(t *testing.T) {
-				length := len(tr.makeParametricHead(paddingLength))
+				length := len(h.makeParametricHead(paddingLength))
 				diff := length - shortLength
 				if diff != paddingLength {
 					t.Errorf("got %d, want %d", diff, paddingLength)
@@ -35,7 +35,7 @@ func TestHomeHandler(t *testing.T) {
 		}
 		for _, targetLength := range tests {
 			t.Run(strconv.Itoa(targetLength), func(t *testing.T) {
-				length := len(tr.makeHead(targetLength))
+				length := len(h.makeHead(targetLength))
 				if length != targetLength {
 					t.Errorf("Want %d, got %d", targetLength, length)
 				}
@@ -52,7 +52,7 @@ func TestHomeHandler(t *testing.T) {
 		}
 		for _, targetLength := range tests {
 			t.Run(strconv.Itoa(targetLength), func(t *testing.T) {
-				length := len(tr.makeHead(targetLength))
+				length := len(h.makeHead(targetLength))
 				if length < targetLength {
 					t.Errorf("Want %d, got %d", targetLength, length)
 				}
