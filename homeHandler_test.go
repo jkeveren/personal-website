@@ -67,6 +67,7 @@ func TestHomeHandler(t *testing.T) {
 
 		t.Run("html", func(t *testing.T) {
 			if !bytes.Contains(h.makeHead(0), []byte("<html")) {
+				// Testing for html tag is a simple way to ensure that actual content is sent not just padding.
 				t.Error("HTML head does not contain html tag")
 			}
 		})
@@ -87,6 +88,7 @@ func TestHomeHandler(t *testing.T) {
 					return
 				}
 			}
+			// Testing for html tag is a simple way to ensure that actual content is sent not just padding.
 			t.Error("Response does not contain html tag")
 		}()
 		h.ServeHTTP(recorder, request)

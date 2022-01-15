@@ -87,8 +87,8 @@ func (h homeHandler) makeParametricHead(paddingLength int) string {
 		padding += "!"
 	}
 
-	return `<meta charset="utf-8">
-<html style="font-size:16px;background:#000;color:#fff">
+	return `<html style="font-size:16px;background:#000;color:#fff">
+<meta charset="utf-8">
 <title>` + title + `</title>
 <meta name=viewport content=width=device-width,user-scalable=no />
 <meta name=title content="` + title + `">
