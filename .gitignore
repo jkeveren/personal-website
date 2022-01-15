@@ -1,10 +1,1 @@
-/*
-!.gitignore
-
-!go.mod
-
-!main.go
-!trickler.go
-!content.html
-
-!personal-website.service
+personal-website
