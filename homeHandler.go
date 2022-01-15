@@ -57,13 +57,17 @@ func (h homeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	headers.Add("cache-control", "no-store")
 	w.Write(h.head)
 
-	for i, line := range h.lines {
-		if i != 0 {
-			time.Sleep(h.lineDelay * time.Millisecond)
+	doneChan := r.Context().Done()
+	for _, line := range h.lines {
+		select {
+		case <-time.After(h.lineDelay * time.Millisecond):
+			w.Write(line)
+			// Allows line by line trickle. Otherwise net/http will buffer more content before sending.
+			flusher.Flush()
+		case <-doneChan:
+			// Keeps tests fast by not wating for full response and doesnt send full response if client disconnects.
+			break
 		}
-		w.Write(line)
-		// Allows line by line trickle. Otherwise http will buffer more content before sending.
-		flusher.Flush()
 	}
 }
 
