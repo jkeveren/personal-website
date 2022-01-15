@@ -2,9 +2,10 @@ package main
 
 import (
 	"embed"
+	"flag"
 	"fmt"
 	"net/http"
-	"os"
+	// "os"
 )
 
 //go:embed web
@@ -14,13 +15,10 @@ func main() {
 
 	http.Handle("/", newHomeHandler())
 
-	// port
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "5000"
-	}
+	address := flag.String("a", "0.0.0.0:8000", "Address to bind to. Includes port.")
+	flag.Parse()
 
 	// HTTP server
-	fmt.Println("Starting HTTP Server on Port " + port + ". Configure using PORT environment variable.")
-	panic(http.ListenAndServe(":"+port, nil))
+	fmt.Println("Starting HTTP Server on address " + *address + ". Configure using \"a\" flag.")
+	panic(http.ListenAndServe(*address, nil))
 }
