@@ -38,33 +38,41 @@ Software Engineer and Maker of things.
 <span>Experience with Go, JavaScript, C#, and a little C++.</span>
 
 Links:
-- <a href=https://github.com/jkeveren>GitHub</a>
-	<span>Mostly private but you can see some of my hobby projects.</span>
-- <a href=gallery>Gallery</a>
-	<span>This documents my non-software projects without depening on social media.</span>
-- <a href=https://www.youtube.com/channel/UCOK3qJpL0I8qbXZsGzwYKzQ>YouTube</a>
-	<span>Infrequent long form videos on projects that lend themselves to video.</span>
-- <a href=https://www.tiktok.com/@jameskeveren>TikTok</a>, <a target=_blank href=https://instagram.com/jameskeveren>Instagram</a>
-	<span>Messing around in my workshop.</span>
-- <a href=https://www.thingiverse.com/jkeveren/designs>Thingiverse</a>
-	<span>Old 3D printing projects.</span>
+    <a href=https://github.com/jkeveren>GitHub</a>
+        <span>Mostly private but you can see some of my hobby projects.</span>
+    <a href=gallery>Gallery</a>
+        <span>This documents my non-software projects without depening on social media.</span>
+    <a href=https://www.youtube.com/channel/UCOK3qJpL0I8qbXZsGzwYKzQ>YouTube</a>
+        <span>Infrequent long form videos on projects that lend themselves to video.</span>
+    <a href=https://www.tiktok.com/@jameskeveren>TikTok</a>, <a target=_blank href=https://instagram.com/jameskeveren>Instagram</a>
+        <span>Messing around in my workshop.</span>
+    <a href=https://www.thingiverse.com/jkeveren/designs>Thingiverse</a>
+        <span>Old 3D printing projects.</span>
 
-Live Services:
-- <a href=https://cam.keve.ren>Garden Cam</a>: <span>Portal into my garden. Sometimes the sun hides behind the planet.</span>
-- <a href=https://massdraw.keve.ren>MassDraw</a>: <span>Exremely simple multi-user whiteboard.</span>
-- iPerf3: <span>iperf -c iperf.keve.ren (Maximum 350Mbps c->s / 35Mbps c<-s)</span>
+Live Services
+    <a href=https://cam.keve.ren>Garden Cam</a>
+        <span>Portal into my garden. Sometimes the sun hides behind the planet.</span>
+    <a href=https://massdraw.keve.ren>MassDraw</a>
+        <span>Exremely simple multi-user whiteboard.</span>
+    iPerf3:
+        <span>iperf -c iperf.keve.ren (Maximum 350Mbps c->s / 35Mbps c<-s)</span>
 
-Skills and Technology <span>(This is optimised for scraping but if you're human that's ok too)</span>:
-- Software Development, Software Engineering<span>
-	Golang, JavaScript, Nodejs, NPM, C#, .Net, Entity Framework, C++, SQL, MSSQL, NoSQL, MongoDB, Git, Mercurial, Magic++, TDD, Regexp, Mocha, Express, Gulp, Pug, HTML, CSS, Websockets, JSON, HTTP</span>
-- System Administration<span>
-	GCP, firebase, AWS, Linux (Arch, Debian, CentOS), Systemd, Fish, Bash, ssh, Haproxy, Nginx, Plesk, dm-crypt, Xinetd, Rsync, Cage, FFmpeg, LTO, Dell iDrac, Raspberry pi</span>
-- Networking<span>
-	Opnsense, Unifi, Poe, HTTP, DNS, TLS, SSL, Letsencrypt, Certbot, Fibre Channel</span>
-- IT support<span>
-	Microsoft 365, MailEnable, Desktop Hardware</span>
-- Non-IT<span>
-	SolidWorks, Fusion360, OpenScad, Blender, Cura, Chitubox, Kdenlive, </span>
+Skills and Technology
+    Software Development, Software Engineering<span>
+        Golang, JavaScript, Nodejs, NPM, C#, .Net, Entity Framework, C++, SQL, MSSQL,
+        NoSQL, MongoDB, Git, Mercurial, TDD, Regexp, Magic++, Mocha, Express, Gulp,
+        Pug, HTML, CSS, Websockets, JSON, HTTP</span>
+    System Administration<span>
+        GCP, firebase, AWS, Linux (Arch, Debian, CentOS), Systemd, Fish, Bash, ssh,
+        Haproxy, Nginx, Plesk, dm-crypt, Xinetd, Rsync, Cage, FFmpeg, LTO, Dell iDrac,
+        Raspberry pi</span>
+    Networking<span>
+        Opnsense, Unifi, HTTP, DNS, TLS, SSL, Letsencrypt, Certbot, Fibre Channel, PoE</span>
+    IT support<span>
+        Microsoft 365, MailEnable, Desktop Hardware</span>
+    Non-IT<span>
+        SolidWorks, Fusion360, OpenScad, Blender, Cura, Chitubox, Kdenlive,
+        Adobe Premier Pro, Gimp, Paint.net</span>
 </pre>
 `
 
