@@ -1,8 +1,9 @@
 /*
 !.gitignore
 
-!personal-website.service
-
 !go.mod
 
 !main.go
+!content.html
+
+!personal-website.service
