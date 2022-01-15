@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"net/http/httputil"
 	"os"
 	"bytes"
 	"time"
@@ -12,70 +11,43 @@ import (
 // Minimum number of bytes to send before text will render as it arrives.
 var minBaseLength = 1023 // 1023 for Firefox, 511 for Edge, 2 for Chrome
 var lineDelayMilliseconds = 20 // delay between sending each line
-var lineDelay time.Duration
-var base []byte
-var lines [][]byte
-
-var content []byte
 
 func main() {
-	lineDelay = time.Duration(lineDelayMilliseconds)
+	t := trickler{}
+
+	// line delay
+	t.lineDelay = time.Duration(lineDelayMilliseconds)
 	content, err := os.ReadFile("./content.html")
 	if err != nil {
 		panic(err)
 	}
 
-	emptyBaseLength := len(makeBase(""))
+	// HTML head
+	emptyBaseLength := len(makeHead(""))
 	paddingLength := minBaseLength - emptyBaseLength
 	var padding string
 	for i := 0; i < paddingLength; i++ {
 		padding += "a"
 	}
-	base = []byte(makeBase(padding))
+	t.head = []byte(makeHead(padding))
 
+	// main content lines
 	stringLines := bytes.SplitAfter(content, []byte("\n"))
 	for _, stringLine := range stringLines {
-		lines = append(lines, []byte(stringLine))
+		t.lines = append(t.lines, []byte(stringLine))
 	}
 
+	// port
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "5000"
 	}
 	fmt.Println("Starting HTTP Server on Port " + port + ". Configure using PORT environment variable.")
-	panic(http.ListenAndServe(":"+port, handler{}))
+	panic(http.ListenAndServe(":"+port, t))
 }
 
-type handler struct{}
-
-func (handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	dump, _ := httputil.DumpRequest(r, false)
-	fmt.Printf("Request from: %s\n%s", r.RemoteAddr, dump)
-
-	flusher, ok := w.(http.Flusher)
-	if !ok {
-		w.WriteHeader(500)
-		w.Write([]byte("server error"))
-		panic("Could not get flusher")
-		return
-	}
-
-	headers := w.Header()
-	headers.Add("content-type", "text/html")
-	headers.Add("cache-control", "no-store")
-	w.Write(base)
-
-	for i, line := range lines {
-		if i != 0 {
-			time.Sleep(lineDelay * time.Millisecond)
-		}
-		w.Write(line)
-		flusher.Flush()
-	}
-}
-
-func makeBase(padding string) string {
+// Returns HTML head with optional padding
+func makeHead(padding string) string {
 	title := "James Keveren"
 	description := "Software Developer"
 
