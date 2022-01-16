@@ -23,7 +23,7 @@ func newHomeHandler() homeHandler {
 	h := homeHandler{}
 
 	h.head = h.makeHead(minHeadLength)
-	h.lineDelay = time.Duration(lineDelayMilliseconds)
+	h.lineDelay = time.Duration(lineDelayMilliseconds) * time.Millisecond
 
 	content, err := web.ReadFile("web/index.html")
 	if err != nil {
@@ -60,7 +60,7 @@ func (h homeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	doneChan := r.Context().Done()
 	for _, line := range h.lines {
 		select {
-		case <-time.After(h.lineDelay * time.Millisecond):
+		case <-time.After(h.lineDelay):
 			w.Write(line)
 			// Allows line by line trickle. Otherwise net/http will buffer more content before sending.
 			flusher.Flush()

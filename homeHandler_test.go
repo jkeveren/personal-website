@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strconv"
 	"testing"
+	"time"
 )
 
 func TestHomeHandler(t *testing.T) {
@@ -92,6 +93,32 @@ func TestHomeHandler(t *testing.T) {
 			t.Error("Response does not contain html tag")
 		}()
 		h.ServeHTTP(recorder, request)
+	})
+
+	t.Run("newHomeHandler", func(t *testing.T) {
+		tests := []struct {
+			name string
+			want interface{}
+			got  interface{}
+		}{
+			{"headLength", 1023, len(h.head)},
+			{"lineDelay", time.Duration(20) * time.Millisecond, h.lineDelay},
+		}
+		for _, test := range tests {
+			t.Run(test.name, func(t *testing.T) {
+				if test.got != test.want {
+					t.Errorf("Want %d, Got %d", test.want, test.got)
+				}
+			})
+		}
+
+		t.Run("line count", func(t *testing.T) {
+			min := 10
+			got := len(h.lines)
+			if got < min {
+				t.Errorf("Want >%d, Got %d", min, got)
+			}
+		})
 	})
 }
 
