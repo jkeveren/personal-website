@@ -93,7 +93,7 @@ func (h homeHandler) makeParametricHead(paddingLength int) string {
 <head>
 	<meta charset="utf-8">
 	<title>` + title + `</title>
-	<meta name=viewport content=width=device-width,user-scalable=no />
+	<meta name=viewport content="width=device-width"/>
 	<meta name=title content="` + title + `">
 	<meta name=description content="` + description + `">
 	<link rel=icon type=image/png href=data:image/png>
