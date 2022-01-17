@@ -25,7 +25,7 @@ func newHomeHandler() homeHandler {
 	h.head = h.makeHead(minHeadLength)
 	h.lineDelay = time.Duration(lineDelayMilliseconds) * time.Millisecond
 
-	content, err := web.ReadFile("web/index.html")
+	content, err := web.ReadFile("web/homeContent.html")
 	if err != nil {
 		panic(err)
 	}
@@ -87,19 +87,24 @@ func (h homeHandler) makeParametricHead(paddingLength int) string {
 		padding += "!"
 	}
 
-	return `<html style="font-size:16px;background:#000;color:#fff">
-<meta charset="utf-8">
-<title>` + title + `</title>
-<meta name=viewport content=width=device-width,user-scalable=no />
-<meta name=title content="` + title + `">
-<meta name=description content="` + description + `">
-<link rel=icon type=image/png href=data:image/png>
-<style>
-	a{color:#ff0}
-	pre{margin:0}
-	span{font-weight: normal}
-</style>
-<script async src=https://www.googletagmanager.com/gtag/js?id=UA-107575308-2></script>
-<base target="_blank">
-<!-- this is a padding comment to ensure that browsers start rendering content as it arrives. Email me if you'd like more info. ` + padding + " -->\n"
+	// first line includes garbage used for black box test
+	return `<!-- 98x7y3m49t -->
+<html style="font-size:16px;background:#000;color:#fff">
+<head>
+	<meta charset="utf-8">
+	<title>` + title + `</title>
+	<meta name=viewport content=width=device-width,user-scalable=no />
+	<meta name=title content="` + title + `">
+	<meta name=description content="` + description + `">
+	<link rel=icon type=image/png href=data:image/png>
+	<style>
+		a{color:#ff0}
+		pre{margin:0}
+		span{font-weight: normal}
+	</style>
+	<script async src=https://www.googletagmanager.com/gtag/js?id=UA-107575308-2></script>
+	<base target="_blank">
+</head>
+<body>
+	<!-- this is a padding comment to ensure that browsers start rendering content as it arrives. Email me if you'd like more info. ` + padding + " -->\n"
 }

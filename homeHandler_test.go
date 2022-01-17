@@ -25,7 +25,7 @@ func TestHomeHandler(t *testing.T) {
 				length := len(h.makeParametricHead(paddingLength))
 				diff := length - shortLength
 				if diff != paddingLength {
-					t.Errorf("Want %d, got %d", paddingLength, diff)
+					t.Fatalf("Want %d, got %d", paddingLength, diff)
 				}
 			})
 		}
@@ -43,7 +43,7 @@ func TestHomeHandler(t *testing.T) {
 				t.Run(strconv.Itoa(targetLength), func(t *testing.T) {
 					length := len(h.makeHead(targetLength))
 					if length != targetLength {
-						t.Errorf("Want %d, got %d", targetLength, length)
+						t.Fatalf("Want %d, got %d", targetLength, length)
 					}
 				})
 			}
@@ -60,16 +60,16 @@ func TestHomeHandler(t *testing.T) {
 				t.Run(strconv.Itoa(targetLength), func(t *testing.T) {
 					length := len(h.makeHead(targetLength))
 					if length < targetLength {
-						t.Errorf("Want %d, got %d", targetLength, length)
+						t.Fatalf("Want %d, got %d", targetLength, length)
 					}
 				})
 			}
 		})
 
 		t.Run("html", func(t *testing.T) {
+			// Testing for html tag is a simple way to ensure that actual content is sent not just padding.
 			if !bytes.Contains(h.makeHead(0), []byte("<html")) {
-				// Testing for html tag is a simple way to ensure that actual content is sent not just padding.
-				t.Error("HTML head does not contain html tag")
+				t.Fatal("HTML head does not contain html tag")
 			}
 		})
 	})
@@ -84,13 +84,13 @@ func TestHomeHandler(t *testing.T) {
 		go func() {
 			for {
 				body := <-recorder.c
+				// Testing for html tag is a simple way to ensure that actual content is sent not just padding.
 				if bytes.Contains(body, []byte("<html")) {
 					cancel()
 					return
 				}
 			}
-			// Testing for html tag is a simple way to ensure that actual content is sent not just padding.
-			t.Error("Response does not contain html tag")
+			t.Fatal("Response does not contain html tag")
 		}()
 		h.ServeHTTP(recorder, request)
 	})
@@ -107,7 +107,7 @@ func TestHomeHandler(t *testing.T) {
 		for _, test := range tests {
 			t.Run(test.name, func(t *testing.T) {
 				if test.got != test.want {
-					t.Errorf("Want %d, Got %d", test.want, test.got)
+					t.Fatalf("Want %d, Got %d", test.want, test.got)
 				}
 			})
 		}
@@ -116,7 +116,7 @@ func TestHomeHandler(t *testing.T) {
 			min := 10
 			got := len(h.lines)
 			if got < min {
-				t.Errorf("Want >%d, Got %d", min, got)
+				t.Fatalf("Want >%d, Got %d", min, got)
 			}
 		})
 	})
