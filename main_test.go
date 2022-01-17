@@ -51,7 +51,8 @@ func TestBlackBox(t *testing.T) {
 	// wait for HTTP server to start
 	<-time.After(10 * time.Millisecond) // more reliable that waiting for start message
 
-	// test various routes
+	// Simple tests for identifiers protects from human error.
+	// This is not a replacement for UI tests but that is far too complex for this simple project.
 	tests := []struct {
 		path       string
 		identifier string

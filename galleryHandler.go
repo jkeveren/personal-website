@@ -15,7 +15,7 @@ func newGalleryHandler() galleryHandler {
 	}
 	return galleryHandler{
 		// contains identifier used in tests
-		append(append([]byte("<!-- q98ny7g0sk --><script type=module>\n"), js...), "</script>"...),
+		append(append([]byte("<!-- q98ny7g0sk --><!DOCTYPE html><script type=module>\n"), js...), "</script>"...),
 	}
 }
 

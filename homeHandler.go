@@ -89,6 +89,7 @@ func (h homeHandler) makeParametricHead(paddingLength int) string {
 
 	// first line includes garbage used for black box test
 	return `<!-- 98x7y3m49t -->
+<!DOCTYPE html>
 <html style="font-size:16px;background:#000;color:#fff">
 <head>
 	<meta charset="utf-8">
