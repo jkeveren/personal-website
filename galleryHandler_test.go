@@ -128,14 +128,14 @@ func TestGalleryHandler(t *testing.T) {
 				recorder := httptest.NewRecorder()
 				g.imageHF(recorder, request)
 
-				t.Run("Content-Type:"+name, func(t *testing.T) {
+				t.Run("Content-Type/"+name, func(t *testing.T) {
 					got := recorder.HeaderMap.Get("Content-Type")
 					if got != mime {
 						t.Fatalf("Want %s, Got %s", mime, got)
 					}
 				})
 
-				t.Run("Last-Modified:"+name, func(t *testing.T) {
+				t.Run("Last-Modified/"+name, func(t *testing.T) {
 					file, err := f.Open(name)
 					if err != nil {
 						t.Fatal(err)
@@ -157,14 +157,6 @@ func TestGalleryHandler(t *testing.T) {
 					}
 				})
 			}
-
-			t.Run("Cache", func(t *testing.T) {
-				want := "public, max-age=3600, no-transform"
-				got := recorder.HeaderMap.Get("Cache-Control")
-				if got != want {
-					t.Fatalf("Want %s, Got %s", want, got)
-				}
-			})
 
 			t.Run("Cache", func(t *testing.T) {
 				want := "public, max-age=3600, no-transform"
