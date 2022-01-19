@@ -1,35 +1,28 @@
 const prev = 0;
 const next = 1;
 
-const test = location.hostname == "localhost";
-
 document.title = "Gallery | James Keveren";
 
 Object.assign(document.body.style, {
 	background: "#000",
-	color: "#fff"
+	color: "#fff",
+	margin: 0
 })
 
 let img = document.createElement("img");
+Object.assign(img.style, {
+	position: "fixed",
+	maxWidth: "100vw",
+	maxHeight: "100vh"
+});
 document.body.appendChild(img);
 let objectURL = "";
 img.addEventListener("load", e => {
-	console.log("revoke");
 	URL.revokeObjectURL(objectURL);
-})
+});
 
-async function moveToImage(direction) {
-	let response = await fetch("/gallery/1-06c.jpg");
-	let content = await response.blob();
-	let objectURL = URL.createObjectURL(content);
-	console.log(objectURL);
-	img.src = objectURL;
-}
-
-if (test) {
-	// very basic client side tests
-	moveToImage(next);
-
-} else {
-	moveToImage(next);
-}
+let response = await fetch("/galleryImage/92708177_p0.jpg");
+let content = await response.blob();
+objectURL = URL.createObjectURL(content);
+console.log(objectURL);
+img.src = objectURL;

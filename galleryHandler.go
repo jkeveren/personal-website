@@ -28,7 +28,6 @@ func newGalleryHandler(f fs.FS) (galleryHandler, error) {
 	}
 
 	// sortedImages
-	firstImage := ""
 	dirEntries, err := fs.ReadDir(g.fs, ".")
 	if err != nil || len(dirEntries) == 0 {
 		nie = noImagesError
@@ -49,7 +48,6 @@ func newGalleryHandler(f fs.FS) (galleryHandler, error) {
 		for _, dirEntry := range dirEntries {
 			g.sortedImages = append(g.sortedImages, dirEntry.Name())
 		}
-		firstImage = g.sortedImages[0]
 	}
 
 	// html
@@ -57,14 +55,19 @@ func newGalleryHandler(f fs.FS) (galleryHandler, error) {
 	if err != nil {
 		panic(err)
 	}
-	start := "<!-- gallery72yr98mj --><!DOCTYPE html>" + nieString + "<script type=module data-first-image=\"" + firstImage + "\" >\n" // contains identifier used in tests
+	start := "<!-- gallery72yr98mj --><!DOCTYPE html>" + nieString + "<script type=module>\n" // contains identifier used in tests
 	end := "</script>"
 	g.html = append(append([]byte(start), js...), end...)
 
 	return g, nie
 }
 
-func (g galleryHandler) indexHF(w http.ResponseWriter, r *http.Request) {
+func (g galleryHandler) redirectHF(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Location", "/gallery/"+g.sortedImages[0])
+	w.WriteHeader(http.StatusTemporaryRedirect)
+}
+
+func (g galleryHandler) pageHF(w http.ResponseWriter, r *http.Request) {
 	w.Write(g.html)
 }
 

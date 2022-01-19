@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"math"
 	"math/rand"
 	"net/http"
@@ -51,7 +50,7 @@ func TestGalleryHandler(t *testing.T) {
 		got := len(g.sortedImages)
 		want := len(images)
 		if got != want {
-			t.Fatalf("Want %d, Got %d", want, got)
+			t.Fatalf("Want: %d, Got: %d", want, got)
 		}
 	})
 
@@ -78,34 +77,50 @@ func TestGalleryHandler(t *testing.T) {
 		}
 	})
 
-	t.Run("indexHF", func(t *testing.T) {
+	t.Run("redirectHF", func(t *testing.T) {
 		request, err := http.NewRequest("GET", "/gallery", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
 		recorder := httptest.NewRecorder()
-		g.indexHF(recorder, request)
+		g.redirectHF(recorder, request)
 
-		t.Run("HTMLContent", func(t *testing.T) {
+		t.Run("statusCode", func(t *testing.T) {
+			want := 307
+			got := recorder.Code
+			if got != want {
+				t.Fatalf("Want: %d, Got: %d", want, got)
+			}
+		})
+
+		t.Run("locationHeader", func(t *testing.T) {
+			want := "/gallery/" + g.sortedImages[0]
+			got := recorder.HeaderMap.Get("Location")
+			if got != want {
+				t.Fatalf("Want: %s, Got: %s", want, got)
+			}
+		})
+	})
+
+	t.Run("pageHF", func(t *testing.T) {
+		request, err := http.NewRequest("GET", "/gallery/"+g.sortedImages[0], nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		recorder := httptest.NewRecorder()
+		g.pageHF(recorder, request)
+
+		t.Run("Content", func(t *testing.T) {
 			want := "<!-- gallery72yr98mj -->"
 			got := string(recorder.Body.Bytes())
 			if got[:len(want)] != want {
 				t.Fatalf("Want: %s..., Got: %s", want, got[:len(want)])
 			}
 		})
-
-		t.Run("firstImage", func(t *testing.T) {
-			want := []byte("data-first-image=\"" + g.sortedImages[0] + "\"")
-			got := recorder.Body.Bytes()
-			if !bytes.Contains(got, want) {
-				n := 150
-				t.Fatalf("Could not find \"%s\" in body.\nFirst %d characters of body: \"%s\"", want, n, string(got[:n]))
-			}
-		})
 	})
 
 	t.Run("imageHF", func(t *testing.T) {
-		request, err := http.NewRequest("GET", "/image.jpg", nil)
+		request, err := http.NewRequest("GET", "/gallery/image/image.jpg", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -116,7 +131,7 @@ func TestGalleryHandler(t *testing.T) {
 			want := "image.jpg"
 			got := string(recorder.Body.Bytes())
 			if want != got {
-				t.Fatalf("Want %s, Got %s", want, got)
+				t.Fatalf("Want: %s, Got: %s", want, got)
 			}
 		})
 
@@ -132,7 +147,7 @@ func TestGalleryHandler(t *testing.T) {
 				t.Run("Content-Type/"+name, func(t *testing.T) {
 					got := recorder.HeaderMap.Get("Content-Type")
 					if got != mime {
-						t.Fatalf("Want %s, Got %s", mime, got)
+						t.Fatalf("Want: %s, Got: %s", mime, got)
 					}
 				})
 
@@ -153,7 +168,7 @@ func TestGalleryHandler(t *testing.T) {
 					want := stat.ModTime().In(l).Format(time.RFC1123)
 					got := recorder.HeaderMap.Get("Last-Modified")
 					if want != got {
-						t.Fatalf("Want %s, Got %s", want, got)
+						t.Fatalf("Want: %s, Got: %s", want, got)
 					}
 				})
 
@@ -169,7 +184,7 @@ func TestGalleryHandler(t *testing.T) {
 						got := recorder.HeaderMap.Get("Next")
 						want := g.sortedImages[sortedIndex+1]
 						if want != got {
-							t.Fatalf("Want %s, Got %s", want, got)
+							t.Fatalf("Want: %s, Got: %s", want, got)
 						}
 					})
 				}
@@ -178,7 +193,7 @@ func TestGalleryHandler(t *testing.T) {
 						got := recorder.HeaderMap.Get("Previous")
 						want := g.sortedImages[sortedIndex-1]
 						if want != got {
-							t.Fatalf("Want %s, Got %s", want, got)
+							t.Fatalf("Want: %s, Got: %s", want, got)
 						}
 					})
 				}
@@ -188,12 +203,12 @@ func TestGalleryHandler(t *testing.T) {
 				want := "public, max-age=3600, no-transform"
 				got := recorder.HeaderMap.Get("Cache-Control")
 				if got != want {
-					t.Fatalf("Want %s, Got %s", want, got)
+					t.Fatalf("Want: %s, Got: %s", want, got)
 				}
 			})
 
 			t.Run("not-found", func(t *testing.T) {
-				request, err := http.NewRequest("GET", "/gallery/yn8g7", nil)
+				request, err := http.NewRequest("GET", "/gallery/image/yn8g7", nil)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -203,7 +218,7 @@ func TestGalleryHandler(t *testing.T) {
 				want := 404
 				got := recorder.Code
 				if got != want {
-					t.Fatalf("Want %d, Got %d", want, got)
+					t.Fatalf("Want: %d, Got: %d", want, got)
 				}
 			})
 		})

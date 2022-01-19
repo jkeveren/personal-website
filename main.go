@@ -15,7 +15,7 @@ func main() {
 
 	// Address
 	address := flag.String("a", "0.0.0.0:8000", "Address to bind to")
-	galleryLocation := flag.String("g", "", "Gallery image location")
+	galleryLocation := flag.String("g", "/usr/share/personal-website/gallery", "Gallery image location")
 	flag.Parse()
 
 	// Routes
@@ -29,9 +29,10 @@ func main() {
 			panic(err)
 		}
 	} else {
-		http.HandleFunc("/gallery/", gh.imageHF)
+		http.HandleFunc("/galleryImage/", gh.imageHF)
 	}
-	http.HandleFunc("/gallery", gh.indexHF)
+	http.HandleFunc("/gallery", gh.redirectHF)
+	http.HandleFunc("/gallery/", gh.pageHF)
 
 	// HTTP server
 	fmt.Println("Starting HTTP Server on address " + *address + ". Configure using the -a flag.")

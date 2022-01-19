@@ -34,7 +34,7 @@ func TestBlackBox(t *testing.T) {
 	}
 	port := l.Addr().(*net.TCPAddr).Port
 	portString := strconv.Itoa(port)
-	baseURL := "http://[::1]:" + portString
+	baseURL := "http://localhost:" + portString
 
 	cmd := exec.Command(tmpBuildName, "-a", ":"+portString, "-g", "test/gallery")
 
@@ -67,7 +67,7 @@ func TestBlackBox(t *testing.T) {
 		identifier string
 	}{
 		{"/", "<!-- homem98y2r8 -->"},
-		{"/gallery", "<!-- gallery72yr98mj -->"},
+		{"/gallery/image", "<!-- gallery72yr98mj -->"},
 	}
 	for _, test := range tests {
 		// make a copy of test in this scope because tests do not run immediately or syncronously
@@ -94,7 +94,7 @@ func TestBlackBox(t *testing.T) {
 		})
 	}
 
-	t.Run("favicon.ico", func(t *testing.T) {
+	t.Run("favicon", func(t *testing.T) {
 		t.Parallel()
 
 		response, err := http.Get(baseURL + "/favicon.ico")
@@ -104,25 +104,66 @@ func TestBlackBox(t *testing.T) {
 		want := 404
 		got := response.StatusCode
 		if got != want {
-			t.Fatalf("Want %d, Got %d", want, got)
+			t.Fatalf("Want: %d, Got: %d", want, got)
 		}
 	})
 
-	t.Run("gallery/image", func(t *testing.T) {
+	t.Run("gallery", func(t *testing.T) {
 		t.Parallel()
 
-		response, err := http.Get(baseURL + "/gallery/image")
+		c := http.Client{
+			// do not follow redirects
+			CheckRedirect: func(r *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		}
+		// make request
+		response, err := c.Get(baseURL + "/gallery")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// read and log body
+		t.Cleanup(func() {
+			if t.Failed() {
+				body := make([]byte, 50)
+				response.Body.Read(body)
+				t.Log(string(body))
+			}
+		})
+
+		t.Run("statusCode", func(t *testing.T) {
+			want := 307
+			got := response.StatusCode
+			if got != want {
+				t.Fatalf("Want: %d, Got: %d", want, got)
+			}
+		})
+
+		t.Run("locationHeader", func(t *testing.T) {
+			want := "/gallery/image"
+			got := response.Header.Get("Location")
+			if got != want {
+				t.Fatalf("Want: %s, Got: %s", want, got)
+			}
+		})
+	})
+
+	t.Run("galleryImage/image", func(t *testing.T) {
+		t.Parallel()
+
+		response, err := http.Get(baseURL + "/galleryImage/image")
 		if err != nil {
 			t.Fatal(err)
 		}
 		want := 200
 		got := response.StatusCode
 		if got != want {
-			t.Fatalf("Want %d, Got %d", want, got)
+			t.Fatalf("Want: %d, Got: %d", want, got)
 		}
 	})
 
-	t.Run("gallery/doesNotExist", func(t *testing.T) {
+	t.Run("galleryImage/doesNotExist", func(t *testing.T) {
 		// This test is necessary because the mock fs used in the unit tests
 		// (testfs.MapFS) behaves differently to the real fs used in main() (os.DirFS())
 		// Specifically, when a file doesn't exist:
@@ -131,14 +172,14 @@ func TestBlackBox(t *testing.T) {
 		// This is not documented
 		t.Parallel()
 
-		response, err := http.Get(baseURL + "/gallery/doesNotExist")
+		response, err := http.Get(baseURL + "/galleryImage/doesNotExist")
 		if err != nil {
 			t.Fatal(err)
 		}
 		want := 404
 		got := response.StatusCode
 		if got != want {
-			t.Fatalf("Want %d, Got %d", want, got)
+			t.Fatalf("Want: %d, Got: %d", want, got)
 		}
 	})
 }
