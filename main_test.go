@@ -36,7 +36,7 @@ func TestBlackBox(t *testing.T) {
 	portString := strconv.Itoa(port)
 	baseURL := "http://[::1]:" + portString
 
-	cmd := exec.Command(tmpBuildName, "-a", ":"+portString)
+	cmd := exec.Command(tmpBuildName, "-a", ":"+portString, "-g", "test/gallery")
 
 	// read std{out,err} for debugging (logged in cleanup)
 	output := &bytes.Buffer{}
@@ -108,7 +108,21 @@ func TestBlackBox(t *testing.T) {
 		}
 	})
 
-	t.Run("gallery/dksfljh", func(t *testing.T) {
+	t.Run("gallery/image", func(t *testing.T) {
+		t.Parallel()
+
+		response, err := http.Get(baseURL + "/gallery/image")
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := 200
+		got := response.StatusCode
+		if got != want {
+			t.Fatalf("Want %d, Got %d", want, got)
+		}
+	})
+
+	t.Run("gallery/doesNotExist", func(t *testing.T) {
 		// This test is necessary because the mock fs used in the unit tests
 		// (testfs.MapFS) behaves differently to the real fs used in main() (os.DirFS())
 		// Specifically, when a file doesn't exist:
@@ -117,7 +131,7 @@ func TestBlackBox(t *testing.T) {
 		// This is not documented
 		t.Parallel()
 
-		response, err := http.Get(baseURL + "/gallery/dksfljh")
+		response, err := http.Get(baseURL + "/gallery/doesNotExist")
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -15,12 +15,13 @@ func main() {
 
 	// Address
 	address := flag.String("a", "0.0.0.0:8000", "Address to bind to")
+	galleryLocation := flag.String("g", "", "Gallery image location")
 	flag.Parse()
 
 	// Routes
 	http.Handle("/", newHomeHandler())
 	http.Handle("/favicon.ico", http.NotFoundHandler())
-	gh, err := newGalleryHandler(os.DirFS("/usr/share/personal-website/gallery"))
+	gh, err := newGalleryHandler(os.DirFS(*galleryLocation))
 	if err != nil {
 		if err == noImagesError {
 			fmt.Println(err.Error())
