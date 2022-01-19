@@ -52,9 +52,9 @@ func (h homeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	headers := w.Header()
-	headers.Add("content-type", "text/html")
+	headers.Add("Content-Type", "text/html")
 	// Caching does not allow trickle
-	headers.Add("cache-control", "no-store")
+	headers.Add("Cache-Control", "no-store")
 	w.Write(h.head)
 
 	doneChan := r.Context().Done()

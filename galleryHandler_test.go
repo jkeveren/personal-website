@@ -120,20 +120,49 @@ func TestGalleryHandler(t *testing.T) {
 		})
 
 		t.Run("headers", func(t *testing.T) {
-			t.Run("Content-Type", func(t *testing.T) {
-				for name, want := range imagesWithMime {
-					t.Run(name, func(t *testing.T) {
-						request, err := http.NewRequest("GET", "/"+name, nil)
-						if err != nil {
-							t.Fatal(err)
-						}
-						recorder := httptest.NewRecorder()
-						g.imageHF(recorder, request)
-						got := recorder.HeaderMap.Get("Content-Type")
-						if got != want {
-							t.Fatalf("Want %s, Got %s", want, got)
-						}
-					})
+			for name, mime := range imagesWithMime {
+				request, err := http.NewRequest("GET", "/"+name, nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+				recorder := httptest.NewRecorder()
+				g.imageHF(recorder, request)
+
+				t.Run("Content-Type:"+name, func(t *testing.T) {
+					got := recorder.HeaderMap.Get("Content-Type")
+					if got != mime {
+						t.Fatalf("Want %s, Got %s", mime, got)
+					}
+				})
+
+				t.Run("Last-Modified:"+name, func(t *testing.T) {
+					file, err := f.Open(name)
+					if err != nil {
+						t.Fatal(err)
+					}
+					stat, err := file.Stat()
+					if err != nil {
+						t.Fatal(err)
+					}
+					// Last-Modified header is always in GMT
+					l, err := time.LoadLocation("GMT")
+					if err != nil {
+						t.Fatal(err)
+					}
+					want := stat.ModTime().In(l).Format(time.RFC1123)
+					got := recorder.HeaderMap.Get("Last-Modified")
+					t.Log(want, got)
+					if want != got {
+						t.Fatalf("Want %s, Got %s", want, got)
+					}
+				})
+			}
+
+			t.Run("Cache", func(t *testing.T) {
+				want := "public, max-age=3600, no-transform"
+				got := recorder.HeaderMap.Get("Cache-Control")
+				if got != want {
+					t.Fatalf("Want %s, Got %s", want, got)
 				}
 			})
 

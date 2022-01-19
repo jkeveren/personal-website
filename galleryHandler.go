@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"path"
 	"sort"
-	"time"
 )
 
 type galleryHandler struct {
@@ -81,5 +80,11 @@ func (g galleryHandler) imageHF(w http.ResponseWriter, r *http.Request) {
 
 	h := w.Header()
 	h.Add("Cache-Control", "public, max-age=3600, no-transform")
-	http.ServeContent(w, r, r.URL.Path, time.Time{}, file.(io.ReadSeeker))
+
+	stat, err := file.Stat()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	http.ServeContent(w, r, r.URL.Path, stat.ModTime(), file.(io.ReadSeeker))
 }
