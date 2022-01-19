@@ -4,8 +4,8 @@ import (
 	"embed"
 	"flag"
 	"fmt"
-	// "io/fs"
 	"net/http"
+	"os"
 )
 
 //go:embed web
@@ -19,9 +19,17 @@ func main() {
 
 	// Routes
 	http.Handle("/", newHomeHandler())
-	http.Handle("/gallery", newGalleryHandler())
-	prefix := "/static/"
-	http.Handle(prefix, http.StripPrefix(prefix, http.FileServer(http.Dir("web/static"))))
+	gh, err := newGalleryHandler(os.DirFS("/usr/share/personal-website/gallery/"))
+	if err != nil {
+		if err == noImagesError {
+			fmt.Println(err.Error())
+		} else {
+			panic(err)
+		}
+	} else {
+		http.HandleFunc("/gallery/", gh.imageHF)
+	}
+	http.HandleFunc("/gallery", gh.indexHF)
 
 	// HTTP server
 	fmt.Println("Starting HTTP Server on address " + *address + ". Configure using the -a flag.")

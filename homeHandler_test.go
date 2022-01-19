@@ -85,7 +85,7 @@ func TestHomeHandler(t *testing.T) {
 			for {
 				body := <-recorder.c
 				// Testing for html tag is a simple way to ensure that actual content is sent not just padding.
-				if bytes.Contains(body, []byte("<html")) {
+				if bytes.Contains(body, []byte("<!-- homem98y2r8 -->")) {
 					cancel()
 					return
 				}

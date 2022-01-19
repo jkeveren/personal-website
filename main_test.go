@@ -21,8 +21,10 @@ func TestBlackBox(t *testing.T) {
 		t.Fatal(err)
 	}
 	tmpBuildName := file.Name()
-	exec.Command("go", "build", "-o", tmpBuildName).Run()
-	defer os.Remove(tmpBuildName)
+	err = exec.Command("go", "build", "-o", tmpBuildName).Run()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// get free port
 	l, err := net.ListenTCP("tcp", &net.TCPAddr{})
@@ -45,7 +47,9 @@ func TestBlackBox(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
+		t.Log(cmd.CombinedOutput())
 		cmd.Process.Kill() // more reliable than a context
+		os.Remove(tmpBuildName)
 	})
 
 	// wait for HTTP server to start
@@ -57,9 +61,8 @@ func TestBlackBox(t *testing.T) {
 		path       string
 		identifier string
 	}{
-		{"/", "<!-- 98x7y3m49t -->"},
-		{"/gallery", "<!-- q98ny7g0sk -->"},
-		{"/static/blackBoxTestFile", "This file exists"},
+		{"/", "<!-- homem98y2r8 -->"},
+		{"/gallery", "<!-- gallery72yr98mj -->"},
 	}
 	for _, test := range tests {
 		// make a copy of test in this scope because tests do not run immediately or syncronously
