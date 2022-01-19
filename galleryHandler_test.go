@@ -191,6 +191,21 @@ func TestGalleryHandler(t *testing.T) {
 					t.Fatalf("Want %s, Got %s", want, got)
 				}
 			})
+
+			t.Run("not-found", func(t *testing.T) {
+				request, err := http.NewRequest("GET", "/yn8ge8r7", nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+				recorder := httptest.NewRecorder()
+				g.imageHF(recorder, request)
+
+				want := 404
+				got := recorder.Code
+				if got != want {
+					t.Fatalf("Want %d, Got %d", want, got)
+				}
+			})
 		})
 	})
 }

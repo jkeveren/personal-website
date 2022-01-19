@@ -70,9 +70,9 @@ func (g galleryHandler) imageHF(w http.ResponseWriter, r *http.Request) {
 	image := path.Base(r.URL.Path)
 	file, err := g.fs.Open(image)
 	if err != nil {
-		switch err {
-		case fs.ErrInvalid, fs.ErrNotExist:
-			w.WriteHeader(http.StatusBadRequest)
+		switch err.(*fs.PathError).Err {
+		case fs.ErrNotExist:
+			w.WriteHeader(http.StatusNotFound)
 		default:
 			w.WriteHeader(http.StatusInternalServerError)
 		}
