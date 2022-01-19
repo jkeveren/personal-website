@@ -93,6 +93,14 @@ func TestHomeHandler(t *testing.T) {
 			t.Fatal("Response does not contain html tag")
 		}()
 		h.ServeHTTP(recorder, request)
+
+		t.Run("Cache", func(t *testing.T) {
+			want := "no-store"
+			got := recorder.HeaderMap.Get("Cache-Control")
+			if got != want {
+				t.Fatalf("Want %s, Got %s", want, got)
+			}
+		})
 	})
 
 	t.Run("newHomeHandler", func(t *testing.T) {

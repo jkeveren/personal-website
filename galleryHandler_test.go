@@ -28,12 +28,14 @@ func TestGalleryHandler(t *testing.T) {
 	f := fstest.MapFS{}
 	imagesWithMime := map[string]string{
 		// "file name": "expected mime type",
-		"image.jpg": "image/jpg",
-		"image.JPG": "image/jpg",
-		"image.png": "image/png",
-		"image.PNG": "image/png",
-		"image.mp4": "video/mp4",
-		"image.MP4": "video/mp4",
+		"image.jpg":  "image/jpeg",
+		"image.JPG":  "image/jpeg",
+		"image.jpeg": "image/jpeg",
+		"image.JPEG": "image/jpeg",
+		"image.png":  "image/png",
+		"image.PNG":  "image/png",
+		"image.mp4":  "video/mp4",
+		"image.MP4":  "video/mp4",
 	}
 	for name := range imagesWithMime {
 		f[name] = newMockFile([]byte(name))
@@ -115,6 +117,33 @@ func TestGalleryHandler(t *testing.T) {
 			if want != got {
 				t.Fatalf("Want %s, Got %s", want, got)
 			}
+		})
+
+		t.Run("headers", func(t *testing.T) {
+			t.Run("Content-Type", func(t *testing.T) {
+				for name, want := range imagesWithMime {
+					t.Run(name, func(t *testing.T) {
+						request, err := http.NewRequest("GET", "/"+name, nil)
+						if err != nil {
+							t.Fatal(err)
+						}
+						recorder := httptest.NewRecorder()
+						g.imageHF(recorder, request)
+						got := recorder.HeaderMap.Get("Content-Type")
+						if got != want {
+							t.Fatalf("Want %s, Got %s", want, got)
+						}
+					})
+				}
+			})
+
+			t.Run("Cache", func(t *testing.T) {
+				want := "public, max-age=3600, no-transform"
+				got := recorder.HeaderMap.Get("Cache-Control")
+				if got != want {
+					t.Fatalf("Want %s, Got %s", want, got)
+				}
+			})
 		})
 	})
 }
