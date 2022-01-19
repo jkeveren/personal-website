@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"bytes"
 	"io"
 	"net"
 	"net/http"
@@ -36,8 +36,12 @@ func TestBlackBox(t *testing.T) {
 	portString := strconv.Itoa(port)
 	baseURL := "http://[::1]:" + portString
 
-	// create cancellable command
 	cmd := exec.Command(tmpBuildName, "-a", ":"+portString)
+
+	// read std{out,err} for debugging (logged in cleanup)
+	output := &bytes.Buffer{}
+	cmd.Stdout = output
+	cmd.Stderr = output
 
 	// keep port reserved until ready to bind
 	l.Close()
@@ -48,7 +52,7 @@ func TestBlackBox(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
-		fmt.Println(cmd.CombinedOutput())
+		t.Log(output)
 		cmd.Process.Kill() // more reliable than a context
 		os.Remove(tmpBuildName)
 	})
