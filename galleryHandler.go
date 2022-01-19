@@ -67,7 +67,8 @@ func (g galleryHandler) indexHF(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g galleryHandler) imageHF(w http.ResponseWriter, r *http.Request) {
-	file, err := g.fs.Open(path.Base(r.URL.Path))
+	image := path.Base(r.URL.Path)
+	file, err := g.fs.Open(image)
 	if err != nil {
 		switch err {
 		case fs.ErrInvalid, fs.ErrNotExist:
@@ -77,14 +78,25 @@ func (g galleryHandler) imageHF(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
-	h := w.Header()
-	h.Add("Cache-Control", "public, max-age=3600, no-transform")
-
 	stat, err := file.Stat()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	h := w.Header()
+	h.Add("Cache-Control", "public, max-age=3600, no-transform")
+	for i, sortedImage := range g.sortedImages {
+		if sortedImage == image {
+			if i < len(g.sortedImages)-1 {
+				h.Add("Next", g.sortedImages[i+1])
+			}
+			if i > 0 {
+				h.Add("Previous", g.sortedImages[i-1])
+			}
+			break
+		}
+	}
+
 	http.ServeContent(w, r, r.URL.Path, stat.ModTime(), file.(io.ReadSeeker))
 }

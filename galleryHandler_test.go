@@ -26,7 +26,7 @@ func TestGalleryHandler(t *testing.T) {
 
 	// generate mock files
 	f := fstest.MapFS{}
-	imagesWithMime := map[string]string{
+	images := map[string]string{
 		// "file name": "expected mime type",
 		"image.jpg":  "image/jpeg",
 		"image.JPG":  "image/jpeg",
@@ -37,9 +37,10 @@ func TestGalleryHandler(t *testing.T) {
 		"image.mp4":  "video/mp4",
 		"image.MP4":  "video/mp4",
 	}
-	for name := range imagesWithMime {
+	for name := range images {
 		f[name] = newMockFile([]byte(name))
 	}
+	imageCount := len(images)
 
 	g, err := newGalleryHandler(f)
 	if err != nil {
@@ -48,9 +49,9 @@ func TestGalleryHandler(t *testing.T) {
 
 	t.Run("sortedImagesLength", func(t *testing.T) {
 		got := len(g.sortedImages)
-		imageCount := len(imagesWithMime)
-		if got != imageCount {
-			t.Fatalf("Want %d, Got %d", imageCount, got)
+		want := len(images)
+		if got != want {
+			t.Fatalf("Want %d, Got %d", want, got)
 		}
 	})
 
@@ -120,7 +121,7 @@ func TestGalleryHandler(t *testing.T) {
 		})
 
 		t.Run("headers", func(t *testing.T) {
-			for name, mime := range imagesWithMime {
+			for name, mime := range images {
 				request, err := http.NewRequest("GET", "/"+name, nil)
 				if err != nil {
 					t.Fatal(err)
@@ -151,11 +152,36 @@ func TestGalleryHandler(t *testing.T) {
 					}
 					want := stat.ModTime().In(l).Format(time.RFC1123)
 					got := recorder.HeaderMap.Get("Last-Modified")
-					t.Log(want, got)
 					if want != got {
 						t.Fatalf("Want %s, Got %s", want, got)
 					}
 				})
+
+				var sortedIndex int
+				for i, sortedImage := range g.sortedImages {
+					if sortedImage == name {
+						sortedIndex = i
+						break
+					}
+				}
+				if sortedIndex < imageCount-1 {
+					t.Run("Next/"+name, func(t *testing.T) {
+						got := recorder.HeaderMap.Get("Next")
+						want := g.sortedImages[sortedIndex+1]
+						if want != got {
+							t.Fatalf("Want %s, Got %s", want, got)
+						}
+					})
+				}
+				if sortedIndex > 0 {
+					t.Run("Previous/"+name, func(t *testing.T) {
+						got := recorder.HeaderMap.Get("Previous")
+						want := g.sortedImages[sortedIndex-1]
+						if want != got {
+							t.Fatalf("Want %s, Got %s", want, got)
+						}
+					})
+				}
 			}
 
 			t.Run("Cache", func(t *testing.T) {
