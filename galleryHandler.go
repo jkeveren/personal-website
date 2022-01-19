@@ -4,9 +4,11 @@ import (
 	"errors"
 	"io"
 	"io/fs"
+	"log"
 	"net/http"
 	"path"
 	"sort"
+	"syscall"
 )
 
 type galleryHandler struct {
@@ -71,9 +73,14 @@ func (g galleryHandler) imageHF(w http.ResponseWriter, r *http.Request) {
 	file, err := g.fs.Open(image)
 	if err != nil {
 		switch err.(*fs.PathError).Err {
-		case fs.ErrNotExist:
+		// When file doesn't exist:
+		// fstest.MapFS.Open() returns fs.ErrNotExist
+		// os.DirFS().Open() returns syscall.ENOENT
+		// This is not documented
+		case fs.ErrNotExist, syscall.ENOENT:
 			w.WriteHeader(http.StatusNotFound)
 		default:
+			log.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return

@@ -193,7 +193,7 @@ func TestGalleryHandler(t *testing.T) {
 			})
 
 			t.Run("not-found", func(t *testing.T) {
-				request, err := http.NewRequest("GET", "/yn8ge8r7", nil)
+				request, err := http.NewRequest("GET", "/gallery/yn8g7", nil)
 				if err != nil {
 					t.Fatal(err)
 				}

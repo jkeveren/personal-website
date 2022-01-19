@@ -107,4 +107,24 @@ func TestBlackBox(t *testing.T) {
 			t.Fatalf("Want %d, Got %d", want, got)
 		}
 	})
+
+	t.Run("gallery/dksfljh", func(t *testing.T) {
+		// This test is necessary because the mock fs used in the unit tests
+		// (testfs.MapFS) behaves differently to the real fs used in main() (os.DirFS())
+		// Specifically, when a file doesn't exist:
+		// fstest.MapFS.Open() returns fs.ErrNotExist
+		// os.DirFS().Open() returns syscall.ENOENT
+		// This is not documented
+		t.Parallel()
+
+		response, err := http.Get(baseURL + "/gallery/dksfljh")
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := 404
+		got := response.StatusCode
+		if got != want {
+			t.Fatalf("Want %d, Got %d", want, got)
+		}
+	})
 }
