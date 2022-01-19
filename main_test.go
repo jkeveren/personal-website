@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -47,7 +48,7 @@ func TestBlackBox(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
-		t.Log(cmd.CombinedOutput())
+		fmt.Println(cmd.CombinedOutput())
 		cmd.Process.Kill() // more reliable than a context
 		os.Remove(tmpBuildName)
 	})
@@ -88,4 +89,18 @@ func TestBlackBox(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("favicon.ico", func(t *testing.T) {
+		t.Parallel()
+
+		response, err := http.Get(baseURL + "/favicon.ico")
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := 404
+		got := response.StatusCode
+		if got != want {
+			t.Fatalf("Want %d, Got %d", want, got)
+		}
+	})
 }

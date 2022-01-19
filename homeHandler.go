@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
-	"net/http/httputil"
 	"time"
 )
 
@@ -39,9 +38,11 @@ func newHomeHandler() homeHandler {
 
 // Trickles content to client
 func (h homeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// print raw request for live analytics. This website does not need to be scalable.
-	dump, _ := httputil.DumpRequest(r, false)
-	fmt.Printf("Request from: %s\n%s", r.RemoteAddr, dump)
+	if r.URL.Path != "/" {
+		w.Header().Add("Location", "/")
+		w.WriteHeader(http.StatusTemporaryRedirect)
+		return
+	}
 
 	flusher, ok := w.(http.Flusher)
 	if !ok {

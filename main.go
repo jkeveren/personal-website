@@ -19,6 +19,7 @@ func main() {
 
 	// Routes
 	http.Handle("/", newHomeHandler())
+	http.Handle("/favicon.ico", http.NotFoundHandler())
 	gh, err := newGalleryHandler(os.DirFS("/usr/share/personal-website/gallery/"))
 	if err != nil {
 		if err == noImagesError {

@@ -74,32 +74,58 @@ func TestHomeHandler(t *testing.T) {
 		})
 	})
 
-	t.Run("HTTP", func(t *testing.T) {
+	t.Run("ServeHTTP", func(t *testing.T) {
 		c, cancel := context.WithCancel(context.Background())
+		t.Cleanup(func() {
+			cancel()
+		})
 		request, err := http.NewRequestWithContext(c, "GET", "/", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
 		recorder := newStreamRecorder()
-		go func() {
-			for {
-				body := <-recorder.c
-				// Testing for html tag is a simple way to ensure that actual content is sent not just padding.
-				if bytes.Contains(body, []byte("<!-- homem98y2r8 -->")) {
-					cancel()
-					return
-				}
-			}
-			t.Fatal("Response does not contain html tag")
-		}()
-		h.ServeHTTP(recorder, request)
+		go h.ServeHTTP(recorder, request)
 
-		t.Run("Cache", func(t *testing.T) {
+		t.Run("body", func(t *testing.T) {
+			want := "<!-- homem98y2r8 -->"
+			got := <-recorder.c
+			if !bytes.Contains(got, []byte(want)) {
+				t.Fatalf("Want %s, Got %s...", want, string(got[:100]))
+				return
+			}
+		})
+
+		t.Run("cacheHeader", func(t *testing.T) {
 			want := "no-store"
 			got := recorder.HeaderMap.Get("Cache-Control")
 			if got != want {
 				t.Fatalf("Want %s, Got %s", want, got)
 			}
+		})
+
+		t.Run("redirect", func(t *testing.T) {
+			request, err := http.NewRequest("GET", "/yn8ge8r7", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			recorder := httptest.NewRecorder()
+			h.ServeHTTP(recorder, request)
+
+			t.Run("statusCode", func(t *testing.T) {
+				want := 307
+				got := recorder.Code
+				if got != want {
+					t.Fatalf("Want %d, Got %d", want, got)
+				}
+			})
+
+			t.Run("locationHeader", func(t *testing.T) {
+				want := "/"
+				got := recorder.HeaderMap.Get("Location")
+				if got != want {
+					t.Fatalf("Want %s, Got %s", want, got)
+				}
+			})
 		})
 	})
 
