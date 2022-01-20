@@ -69,12 +69,18 @@ for (let i = 0; i < 2; i++) {
 	document.body.appendChild(b);
 }
 
+const imageNotFoundError = new Error("image not found");
+const emptyURLImageError = new Error("no image name was found in URL");
+
 // get imageIndex of image from URL
 function getURLImageIndex() {
 	// get image name from path
 	let parts = location.pathname.split("/");
+	// use first image if no image is specified
 	let URLImage = parts[parts.length - 1];
-	
+	if (URLImage === "") {
+		return [0, emptyURLImageError];
+	}
 	let URLImageIndex = null;
 	// find index of image from url
 	for (let i = 0; i < images.length; i++) {
@@ -84,7 +90,7 @@ function getURLImageIndex() {
 		}
 	}
 	if (URLImageIndex === null) {
-		return [null, new Error("image not found")]
+		return [null, imageNotFoundError]
 	}
 	return [URLImageIndex, null]
 }
@@ -124,11 +130,7 @@ async function displayImage(i, pushState) {
 
 // SPA navigation
 addEventListener("popstate", async e => {
-	let [i, err] = getURLImageIndex()
-	if (err != null) {
-		displayError(err)
-	}
-	await displayImage(i, false)
+	displayImageFromURL();
 });
 
 // arrow keys
@@ -153,8 +155,17 @@ addEventListener("wheel", e => {
 }, {passive: false}); // passive: false to allow e.preventdefault()
 
 // display image from URL
-let [i = 0, err] = getURLImageIndex()
-if (err != null) {
-	displayError(err)
+async function displayImageFromURL() {
+	let [i = 0, err] = getURLImageIndex()
+	if (err != null && err != emptyURLImageError) {
+		displayError(err)
+		throw "throwing because it's impossible to return here"
+	}
+	if (err === emptyURLImageError) {
+		// use replaceState to allow the use of back button to get back to home page
+		history.replaceState({}, document.title, images[i])
+	}
+	await displayImage(i, false);
 }
-await displayImage(i, false);
+
+displayImageFromURL();
