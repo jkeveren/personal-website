@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"testing/fstest"
 	"time"
@@ -77,31 +78,6 @@ func TestGalleryHandler(t *testing.T) {
 		}
 	})
 
-	t.Run("redirectHF", func(t *testing.T) {
-		request, err := http.NewRequest("GET", "/galleryFirst", nil)
-		if err != nil {
-			t.Fatal(err)
-		}
-		recorder := httptest.NewRecorder()
-		g.redirectHF(recorder, request)
-
-		t.Run("statusCode", func(t *testing.T) {
-			want := 307
-			got := recorder.Code
-			if got != want {
-				t.Fatalf("Want: %d, Got: %d", want, got)
-			}
-		})
-
-		t.Run("locationHeader", func(t *testing.T) {
-			want := "/gallery/" + g.sortedImages[0]
-			got := recorder.HeaderMap.Get("Location")
-			if got != want {
-				t.Fatalf("Want: %s, Got: %s", want, got)
-			}
-		})
-	})
-
 	t.Run("pageHF", func(t *testing.T) {
 		request, err := http.NewRequest("GET", "/gallery/"+g.sortedImages[0], nil)
 		if err != nil {
@@ -117,6 +93,22 @@ func TestGalleryHandler(t *testing.T) {
 				t.Fatalf("Want: %s..., Got: %s", want, got[:len(want)])
 			}
 		})
+	})
+
+	t.Run("imagesHF", func(t *testing.T) {
+		request, err := http.NewRequest("GET", "/galleryImages", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		recorder := httptest.NewRecorder()
+		g.imagesHF(recorder, request)
+
+		want := strings.Join(g.sortedImages, "\n")
+		got := recorder.Body.String()
+		if got != want {
+			t.Log("Code:", recorder.Code)
+			t.Fatalf("Want: %s, Got: %s", want, got)
+		}
 	})
 
 	t.Run("imageHF", func(t *testing.T) {

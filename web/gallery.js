@@ -26,43 +26,42 @@ img.addEventListener("load", e => {
 	URL.revokeObjectURL(objectURL);
 });
 
-let nextImage = null;
-let prevImage = null;
+// get array of images
+let response = await fetch("/galleryImages");
+let imagesString = await response.text();
+let images = imagesString.split("\n");
+let imageIndex = 0;
+
 let abortController = new AbortController()
 
 // get image from server and push to img element
-async function displayImage(image, pushState) {
+async function displayImage(i, pushState) {
+	let image = images[i];
 	// If there's nothing to do; do nothing.
-	if (image === null) {
+	if (image === undefined) {
 		return
 	}
+
+	// abort any previous fetch to avoid race condition
+	abortController.abort();
+
+	imageIndex = i;
 
 	// SPA navigation
 	if (pushState) {
 		history.pushState({}, document.title, image);
 	}
 
-	// abort any previous fetch to avoid race condition
-	abortController.abort()
+	// fetch image
 	abortController = new AbortController()
 	let response = await fetch("/galleryImage/" + image, {
 		signal: abortController.signal
 	});
 
-	// get next and prev image
-	nextImage = response.headers.get("Next");
-	prevImage = response.headers.get("Previous");
-
 	// push image to img element
 	let content = await response.blob();
 	objectURL = URL.createObjectURL(content);
 	img.src = objectURL;
-}
-
-// get image name from path
-function getImageName(path) {
-	let parts = path.split("/");
-	return parts[parts.length - 1];
 }
 
 // SPA navigation
@@ -73,11 +72,12 @@ addEventListener("popstate", e => {
 
 // arrow keys
 addEventListener("keydown", e => {
-	e.preventDefault()
 	if (e.key === "ArrowRight") {
-		displayImage(nextImage, true);
+		e.preventDefault()
+		displayImage(imageIndex + 1, true);
 	} else if (e.key === "ArrowLeft") {
-		displayImage(prevImage, true);
+		e.preventDefault()
+		displayImage(imageIndex - 1, true);
 	}
 });
 
@@ -85,12 +85,24 @@ addEventListener("keydown", e => {
 addEventListener("wheel", e => {
 	e.preventDefault()
 	if (e.deltaY > 0) {
-		displayImage(nextImage, true);
+		displayImage(imageIndex + 1, true);
 	} else {
-		displayImage(prevImage, true);
+		displayImage(imageIndex - 1, true);
 	}
 }, {passive: false}); // passive: true to allow e.preventdefault()
 
-// display first image
-let image = getImageName(location.pathname);
-await displayImage(image, false);
+
+// get image name from path
+let parts = location.pathname.split("/");
+let URLImage = parts[parts.length - 1];
+
+// find index of image from url
+for (let i = 0; i < images.length; i++) {
+	let image = images[i];
+	if (image == URLImage) {
+		imageIndex = i;
+	}
+}
+
+// display appropriate image
+await displayImage(imageIndex, false);

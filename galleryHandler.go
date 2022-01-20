@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"path"
 	"sort"
+	"strings"
 	"syscall"
 )
 
@@ -55,20 +56,19 @@ func newGalleryHandler(f fs.FS) (galleryHandler, error) {
 	if err != nil {
 		panic(err)
 	}
-	start := "<!-- gallery72yr98mj --><!DOCTYPE html>" + nieString + "<script type=module>\n" // contains identifier used in tests
+	start := "<!-- gallery72yr98mj --><!DOCTYPE html>" + nieString + "<script type=module>" // contains identifier used in tests
 	end := "</script>"
 	g.html = append(append([]byte(start), js...), end...)
 
 	return g, nie
 }
 
-func (g galleryHandler) redirectHF(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Location", "/gallery/"+g.sortedImages[0])
-	w.WriteHeader(http.StatusTemporaryRedirect)
-}
-
 func (g galleryHandler) pageHF(w http.ResponseWriter, r *http.Request) {
 	w.Write(g.html)
+}
+
+func (g galleryHandler) imagesHF(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte(strings.Join(g.sortedImages, "\n")))
 }
 
 func (g galleryHandler) imageHF(w http.ResponseWriter, r *http.Request) {

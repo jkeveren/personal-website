@@ -20,6 +20,7 @@ func main() {
 
 	// Routes
 	http.Handle("/", newHomeHandler())
+	// 404 favicon, other non-existant resources should be redirected to "/"
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 	gh, err := newGalleryHandler(os.DirFS(*galleryLocation))
 	if err != nil {
@@ -31,8 +32,8 @@ func main() {
 	} else {
 		http.HandleFunc("/galleryImage/", gh.imageHF) // serves images
 	}
-	http.HandleFunc("/galleryFirst", gh.redirectHF) // redirects to gallery page with first image name
-	http.HandleFunc("/gallery/", gh.pageHF)         // serves the gallery page
+	http.HandleFunc("/galleryImages", gh.imagesHF) // redirects to gallery page with first image name
+	http.HandleFunc("/gallery/", gh.pageHF)        // serves the gallery page
 
 	// HTTP server
 	fmt.Println("Starting HTTP Server on address " + *address + ". Configure using the -a flag.")

@@ -60,6 +60,13 @@ func TestBlackBox(t *testing.T) {
 	// wait for HTTP server to start
 	<-time.After(10 * time.Millisecond) // more reliable that waiting for start message
 
+	c := http.Client{
+		// do not follow redirects
+		CheckRedirect: func(r *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
 	// Simple tests for identifiers protects from human error.
 	// This is not a replacement for UI tests but that is far too complex for this simple project.
 	tests := []struct {
@@ -76,7 +83,7 @@ func TestBlackBox(t *testing.T) {
 			t.Parallel()
 
 			// make request
-			response, err := http.Get(baseURL + test.path)
+			response, err := c.Get(baseURL + test.path)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -97,7 +104,7 @@ func TestBlackBox(t *testing.T) {
 	t.Run("favicon", func(t *testing.T) {
 		t.Parallel()
 
-		response, err := http.Get(baseURL + "/favicon.ico")
+		response, err := c.Get(baseURL + "/favicon.ico")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -108,51 +115,30 @@ func TestBlackBox(t *testing.T) {
 		}
 	})
 
-	t.Run("galleryFirst", func(t *testing.T) {
+	t.Run("galleryImages", func(t *testing.T) {
 		t.Parallel()
 
-		c := http.Client{
-			// do not follow redirects
-			CheckRedirect: func(r *http.Request, via []*http.Request) error {
-				return http.ErrUseLastResponse
-			},
-		}
-		// make request
-		response, err := c.Get(baseURL + "/galleryFirst")
+		response, err := c.Get(baseURL + "/galleryImages")
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		// read and log body
-		t.Cleanup(func() {
-			if t.Failed() {
-				body := make([]byte, 50)
-				response.Body.Read(body)
-				t.Log(string(body))
-			}
-		})
-
-		t.Run("statusCode", func(t *testing.T) {
-			want := 307
-			got := response.StatusCode
-			if got != want {
-				t.Fatalf("Want: %d, Got: %d", want, got)
-			}
-		})
-
-		t.Run("locationHeader", func(t *testing.T) {
-			want := "/gallery/image"
-			got := response.Header.Get("Location")
-			if got != want {
-				t.Fatalf("Want: %s, Got: %s", want, got)
-			}
-		})
+		body, err := io.ReadAll(response.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Log(body)
+		want := "image"
+		got := string(body)
+		if got != want {
+			t.Fatalf("Want: %s, Got: %s", want, got)
+		}
 	})
 
 	t.Run("galleryImage/image", func(t *testing.T) {
 		t.Parallel()
 
-		response, err := http.Get(baseURL + "/galleryImage/image")
+		response, err := c.Get(baseURL + "/galleryImage/image")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -172,7 +158,7 @@ func TestBlackBox(t *testing.T) {
 		// This is not documented
 		t.Parallel()
 
-		response, err := http.Get(baseURL + "/galleryImage/doesNotExist")
+		response, err := c.Get(baseURL + "/galleryImage/doesNotExist")
 		if err != nil {
 			t.Fatal(err)
 		}
