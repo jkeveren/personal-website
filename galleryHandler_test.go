@@ -78,7 +78,7 @@ func TestGalleryHandler(t *testing.T) {
 	})
 
 	t.Run("redirectHF", func(t *testing.T) {
-		request, err := http.NewRequest("GET", "/gallery", nil)
+		request, err := http.NewRequest("GET", "/galleryFirst", nil)
 		if err != nil {
 			t.Fatal(err)
 		}

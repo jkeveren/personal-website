@@ -108,7 +108,7 @@ func TestBlackBox(t *testing.T) {
 		}
 	})
 
-	t.Run("gallery", func(t *testing.T) {
+	t.Run("galleryFirst", func(t *testing.T) {
 		t.Parallel()
 
 		c := http.Client{
@@ -118,7 +118,7 @@ func TestBlackBox(t *testing.T) {
 			},
 		}
 		// make request
-		response, err := c.Get(baseURL + "/gallery")
+		response, err := c.Get(baseURL + "/galleryFirst")
 		if err != nil {
 			t.Fatal(err)
 		}

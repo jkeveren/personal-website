@@ -29,10 +29,10 @@ func main() {
 			panic(err)
 		}
 	} else {
-		http.HandleFunc("/galleryImage/", gh.imageHF)
+		http.HandleFunc("/galleryImage/", gh.imageHF) // serves images
 	}
-	http.HandleFunc("/gallery", gh.redirectHF)
-	http.HandleFunc("/gallery/", gh.pageHF)
+	http.HandleFunc("/galleryFirst", gh.redirectHF) // redirects to gallery page with first image name
+	http.HandleFunc("/gallery/", gh.pageHF)         // serves the gallery page
 
 	// HTTP server
 	fmt.Println("Starting HTTP Server on address " + *address + ". Configure using the -a flag.")
