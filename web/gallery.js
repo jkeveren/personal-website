@@ -11,6 +11,11 @@ Object.assign(document.body.style, {
 	margin: 0
 })
 
+function displayError(err) {
+	// TODO: write to element
+	console.error(err);
+}
+
 // create img element and style it
 let img = document.createElement("img");
 Object.assign(img.style, {
@@ -19,6 +24,7 @@ Object.assign(img.style, {
 	height: "100vh"
 });
 document.body.appendChild(img);
+// TODO: handle load error event
 
 // handle object URLs
 let objectURL = "";
@@ -30,11 +36,29 @@ img.addEventListener("load", e => {
 let response = await fetch("/galleryImages");
 let imagesString = await response.text();
 let images = imagesString.split("\n");
-let imageIndex = 0;
 
-let abortController = new AbortController()
+// get imageIndex of image from URL
+function getURLImageIndex() {
+	// get image name from path
+	let parts = location.pathname.split("/");
+	let URLImage = parts[parts.length - 1];
+	
+	let URLImageIndex = null;
+	// find index of image from url
+	for (let i = 0; i < images.length; i++) {
+		let image = images[i];
+		if (image == URLImage) {
+			URLImageIndex = i;
+		}
+	}
+	if (URLImageIndex === null) {
+		return [null, new Error("image not found")]
+	}
+	return [URLImageIndex, null]
+}
 
 // get image from server and push to img element
+let imageIndex = 0;
 async function displayImage(i, pushState) {
 	let image = images[i];
 	// If there's nothing to do; do nothing.
@@ -43,7 +67,7 @@ async function displayImage(i, pushState) {
 	}
 
 	// abort any previous fetch to avoid race condition
-	abortController.abort();
+// 	abortController.abort();
 
 	imageIndex = i;
 
@@ -52,22 +76,27 @@ async function displayImage(i, pushState) {
 		history.pushState({}, document.title, image);
 	}
 
-	// fetch image
-	abortController = new AbortController()
-	let response = await fetch("/galleryImage/" + image, {
-		signal: abortController.signal
-	});
-
-	// push image to img element
-	let content = await response.blob();
-	objectURL = URL.createObjectURL(content);
-	img.src = objectURL;
+	// Firefox refuses to abort correctly regardless of request technique. I've
+	// tried fetch with AbortController, XMHttpRequest with it's abort method and
+	// just setting the src value of an img element and none of them abort
+	// correctly on firefox. The aborting does remove the image load race
+	// condition caused by skipping multiple images but it still continues to
+	// load a good portion of the image in the background which consumes
+	// bandwidth.
+	//
+	// Setting src to "" first clears the image so the next image is displayed
+	// progressively as it loads. Good for slow connections.
+	img.src = "";
+	img.src = "/galleryImage/" + image;
 }
 
 // SPA navigation
-addEventListener("popstate", e => {
-	let image = getImageName(location.pathname)
-	displayImage(image, false)
+addEventListener("popstate", async e => {
+	let [i, err] = getURLImageIndex()
+	if (err != null) {
+		displayError(err)
+	}
+	await displayImage(i, false)
 });
 
 // arrow keys
@@ -89,20 +118,11 @@ addEventListener("wheel", e => {
 	} else {
 		displayImage(imageIndex - 1, true);
 	}
-}, {passive: false}); // passive: true to allow e.preventdefault()
+}, {passive: false}); // passive: false to allow e.preventdefault()
 
-
-// get image name from path
-let parts = location.pathname.split("/");
-let URLImage = parts[parts.length - 1];
-
-// find index of image from url
-for (let i = 0; i < images.length; i++) {
-	let image = images[i];
-	if (image == URLImage) {
-		imageIndex = i;
-	}
+// display image from URL
+let [i = 0, err] = getURLImageIndex()
+if (err != null) {
+	displayError(err)
 }
-
-// display appropriate image
-await displayImage(imageIndex, false);
+await displayImage(i, false);
