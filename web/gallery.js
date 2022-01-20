@@ -6,9 +6,11 @@ console.info("https://github.com/jkeveren/personal-website")
 
 document.title = "Gallery | James Keveren";
 
-// put margin in bin
+// clean up body
 Object.assign(document.body.style, {
-	margin: 0
+	margin: 0,
+	background: "rgb(127,127,127)", // 50% grey is least jarring
+	fontFamily: "sans-serif",
 })
 
 function displayError(err) {
@@ -28,16 +30,44 @@ img.addEventListener("error", e => {
 	displayError(e)
 })
 
-// handle object URLs
-let objectURL = "";
-img.addEventListener("load", e => {
-	URL.revokeObjectURL(objectURL);
-});
-
 // get array of images
 let response = await fetch("/galleryImages");
 let imagesString = await response.text();
 let images = imagesString.split("\n");
+let imageIndex = 0;
+
+// create on screen controls
+// Swiping is better on a touch screen device but I want to stick with the low
+// tech theme of the home page. I'm not styling the buttons either. Enjoy those
+// default html buttons.
+let buttons = [];
+for (let i = 0; i < 2; i++) {
+	let b = document.createElement("button");
+	buttons[i] = b;
+	let height = "60px"
+	Object.assign(b.style, {
+		position: "fixed",
+		width: "50px",
+		height: height,
+		top: `calc(50vh - ${height})`
+	});
+	if (i === 0) {
+		b.style.left = 0;
+		b.textContent = "<";
+		b.title = "Previous Image";
+		b.addEventListener("click", e => {
+			displayImage(imageIndex - 1, true);
+		});
+	} else {
+		b.style.right = 0;
+		b.textContent = ">";
+		b.title = "Next Image";
+		b.addEventListener("click", e => {
+			displayImage(imageIndex + 1, true);
+		});
+	}
+	document.body.appendChild(b);
+}
 
 // get imageIndex of image from URL
 function getURLImageIndex() {
@@ -60,7 +90,6 @@ function getURLImageIndex() {
 }
 
 // get image from server and push to img element
-let imageIndex = 0;
 async function displayImage(i, pushState) {
 	let image = images[i];
 	// If there's nothing to do; do nothing.
@@ -69,6 +98,10 @@ async function displayImage(i, pushState) {
 	}
 
 	imageIndex = i;
+
+	// manage button state
+	buttons[0].disabled = i === 0;
+	buttons[1].disabled = i === images.length - 1;
 
 	// SPA navigation
 	if (pushState) {
