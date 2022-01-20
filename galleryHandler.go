@@ -56,7 +56,7 @@ func newGalleryHandler(f fs.FS) (galleryHandler, error) {
 	if err != nil {
 		panic(err)
 	}
-	start := "<!-- gallery72yr98mj --><!DOCTYPE html>" + nieString + "<script type=module>" // contains identifier used in tests
+	start := "<!-- gallery72yr98mj --><!DOCTYPE html><meta name=\"viewport\" content=\"width=device-width\">" + nieString + "<script type=module>" // contains identifier used in tests
 	end := "</script>"
 	g.html = append(append([]byte(start), js...), end...)
 
