@@ -71,14 +71,25 @@ addEventListener("popstate", e => {
 	displayImage(image, false)
 });
 
-// Arrow keys
+// arrow keys
 addEventListener("keydown", e => {
+	e.preventDefault()
 	if (e.key === "ArrowRight") {
 		displayImage(nextImage, true);
 	} else if (e.key === "ArrowLeft") {
 		displayImage(prevImage, true);
 	}
 });
+
+// scroll wheel
+addEventListener("wheel", e => {
+	e.preventDefault()
+	if (e.deltaY > 0) {
+		displayImage(nextImage, true);
+	} else {
+		displayImage(prevImage, true);
+	}
+}, {passive: false}); // passive: true to allow e.preventdefault()
 
 // display first image
 let image = getImageName(location.pathname);
