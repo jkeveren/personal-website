@@ -24,7 +24,9 @@ Object.assign(img.style, {
 	height: "100vh"
 });
 document.body.appendChild(img);
-// TODO: handle load error event
+img.addEventListener("error", e => {
+	displayError(e)
+})
 
 // handle object URLs
 let objectURL = "";
@@ -65,9 +67,6 @@ async function displayImage(i, pushState) {
 	if (image === undefined) {
 		return
 	}
-
-	// abort any previous fetch to avoid race condition
-// 	abortController.abort();
 
 	imageIndex = i;
 
