@@ -1,27 +1,36 @@
 // I haven't written unit tests for this yet. This is mostly because I don't
 // have time right now given my unfamiliarity of unit testing client side JS.
 
-// steal my code
+// use this for handling errors that have no recourse
+function fatalError(err) {
+	// TODO: display error to user
+	console.error(err)
+}
+
+// yoink my code
 console.info("https://github.com/jkeveren/personal-website")
 
 document.title = "Gallery | James Keveren";
 
-// set up body for background image
+// clean up body
 Object.assign(document.body.style, {
 	margin: 0,
-	backgroundSize: "contain",
-	backgroundRepeat: "no-repeat",
-	backgroundPosition: "center",
-	backgroundColor: "rgb(127,127,127)", // 50% grey is least jarring
+	background: "rgb(127,127,127)", // 50% grey is least jarring
 	fontFamily: "sans-serif",
-	width: "100vw",
-	height: "100vh",
+	overflow: "hidden", // disable scollbars
 })
 
-function displayError(err) {
-	// TODO: write to element
-	console.error(err);
-}
+// create img element
+let img = document.createElement("img");
+Object.assign(img.style, {
+	width: "100vw",
+	height: "100vh",
+	objectFit: "contain", // This is what scales the image correctly
+});
+document.body.appendChild(img);
+img.addEventListener("error", e => {
+	fatalError(e)
+})
 
 // get array of images
 let response = await fetch("/galleryImages");
@@ -42,7 +51,7 @@ for (let i = 0; i < 2; i++) {
 		position: "fixed",
 		width: "50px",
 		height: height,
-		top: `calc(50vh - ${height})`
+		top: `calc(50vh - ${height}/2)`
 	});
 	if (i === 0) {
 		b.style.left = 0;
@@ -108,13 +117,20 @@ async function displayImage(i, pushState) {
 	}
 
 	// Firefox refuses to abort correctly regardless of request technique. I've
-	// tried fetch with AbortController, XMHttpRequest with it's abort method,
-	// just setting the src value of an img element and using css background-image
-	// of body and none of them abort correctly on firefox. The aborting does
-	// remove the image load race condition caused by skipping multiple images but
-	// it still continues to load a good portion of the image in the background
-	// which consumes bandwidth.
-	document.body.style.backgroundImage = `url("/galleryImage/${image}")`
+	// tried fetch with AbortController, XMHttpRequest with it's abort method and
+	// just setting the src value of an img element and none of them abort
+	// correctly on firefox. The aborting does remove the image load race
+	// condition caused by skipping multiple images but it still continues to
+	// load a good portion of the image in the background which consumes
+	// bandwidth.
+	// 
+	// Using css background-image: url() does not abort previous requests at all
+	// in any browser that I tried.
+	//
+	// Setting src to "" first clears the image so the next image is displayed
+	// progressively as it loads. Good for slow connections.
+	img.src = "";
+	img.src = "/galleryImage/" + image;
 }
 
 // SPA navigation
@@ -147,7 +163,7 @@ addEventListener("wheel", e => {
 async function displayImageFromURL() {
 	let [i = 0, err] = getURLImageIndex()
 	if (err != null && err != emptyURLImageError) {
-		displayError(err)
+		fatalError(err)
 		throw "throwing because it's impossible to return here"
 	}
 	await displayImage(i, err === emptyURLImageError);
