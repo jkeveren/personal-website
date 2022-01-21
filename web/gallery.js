@@ -6,29 +6,22 @@ console.info("https://github.com/jkeveren/personal-website")
 
 document.title = "Gallery | James Keveren";
 
-// clean up body
+// set up body for background image
 Object.assign(document.body.style, {
 	margin: 0,
-	background: "rgb(127,127,127)", // 50% grey is least jarring
+	backgroundSize: "contain",
+	backgroundRepeat: "no-repeat",
+	backgroundPosition: "center",
+	backgroundColor: "rgb(127,127,127)", // 50% grey is least jarring
 	fontFamily: "sans-serif",
+	width: "100vw",
+	height: "100vh",
 })
 
 function displayError(err) {
 	// TODO: write to element
 	console.error(err);
 }
-
-// create img element and style it
-let img = document.createElement("img");
-Object.assign(img.style, {
-	position: "fixed",
-	width: "100vw",
-	height: "100vh"
-});
-document.body.appendChild(img);
-img.addEventListener("error", e => {
-	displayError(e)
-})
 
 // get array of images
 let response = await fetch("/galleryImages");
@@ -111,21 +104,17 @@ async function displayImage(i, pushState) {
 
 	// SPA navigation
 	if (pushState) {
-		history.pushState({}, document.title, image);
+		history.replaceState({}, document.title, image);
 	}
 
 	// Firefox refuses to abort correctly regardless of request technique. I've
-	// tried fetch with AbortController, XMHttpRequest with it's abort method and
-	// just setting the src value of an img element and none of them abort
-	// correctly on firefox. The aborting does remove the image load race
-	// condition caused by skipping multiple images but it still continues to
-	// load a good portion of the image in the background which consumes
-	// bandwidth.
-	//
-	// Setting src to "" first clears the image so the next image is displayed
-	// progressively as it loads. Good for slow connections.
-	img.src = "";
-	img.src = "/galleryImage/" + image;
+	// tried fetch with AbortController, XMHttpRequest with it's abort method,
+	// just setting the src value of an img element and using css background-image
+	// of body and none of them abort correctly on firefox. The aborting does
+	// remove the image load race condition caused by skipping multiple images but
+	// it still continues to load a good portion of the image in the background
+	// which consumes bandwidth.
+	document.body.style.backgroundImage = `url("/galleryImage/${image}")`
 }
 
 // SPA navigation
@@ -161,11 +150,7 @@ async function displayImageFromURL() {
 		displayError(err)
 		throw "throwing because it's impossible to return here"
 	}
-	if (err === emptyURLImageError) {
-		// use replaceState to allow the use of back button to get back to home page
-		history.replaceState({}, document.title, images[i])
-	}
-	await displayImage(i, false);
+	await displayImage(i, err === emptyURLImageError);
 }
 
 displayImageFromURL();
