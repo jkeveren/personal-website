@@ -1,0 +1,10 @@
+#! /usr/bin/bash
+
+# Reduces the size of images marked with the user.gallery xattr, put them in
+# appropriate directory and copy the mod times.
+
+for f in $(fbea user.gallery) // depends on https://github.com/jkeveren/find-by-extended-attribute
+do
+	dest=/usr/share/personal-website/gallery/$f
+	convert $f -quality 50 -resize 1920x1920 $dest && touch -r $f $dest
+done
