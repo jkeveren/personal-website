@@ -1,11 +1,9 @@
 [Unit]
 Description="James Keveren's Personal Website"
+After=network.target
 
 [Service]
+User=personal-website
 Type=exec
-Environment=PORT=8080
 ExecStart=/usr/local/bin/personal-website
 Restart=always
-
-[Install]
-WantedBy=network.target
