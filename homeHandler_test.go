@@ -136,7 +136,7 @@ func TestHomeHandler(t *testing.T) {
 			got  interface{}
 		}{
 			{"headLength", 1023, len(h.head)},
-			{"lineDelay", time.Duration(20) * time.Millisecond, h.lineDelay},
+			{"lineDelay", time.Duration(100) * time.Millisecond, h.lineDelay},
 		}
 		for _, test := range tests {
 			t.Run(test.name, func(t *testing.T) {

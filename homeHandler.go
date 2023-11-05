@@ -17,7 +17,7 @@ type homeHandler struct {
 func newHomeHandler() homeHandler {
 	// Minimum number of bytes to send before text will render as it arrives.
 	minHeadLength := 1023       // 1023 for Firefox, 511 for Edge, 2 for Chrome
-	lineDelayMilliseconds := 20 // delay between sending each line
+	lineDelayMilliseconds := 100 // delay between sending each line
 
 	h := homeHandler{}
 
